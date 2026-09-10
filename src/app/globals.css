@@ -1,0 +1,288 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #07110d;
+  --bg-2: #0b1611;
+  --surface: #0f1d17;
+  --card: #15251e;
+  --card-2: #1b2f26;
+  --text: #f5f3ea;
+  --muted: #93a69b;
+  --lime: #b7ff45;
+  --lime-dim: #8fd62e;
+  --amber: #ffb84d;
+  --coral: #ff6b6b;
+  --border: rgb(255 255 255 / 0.1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-card: var(--card);
+  --color-ink: var(--text);
+  --color-muted: var(--muted);
+  --color-lime: var(--lime);
+  --color-amber: var(--amber);
+  --color-coral: var(--coral);
+  --font-sans: var(--font-geist-sans);
+  --font-display: var(--font-display);
+  --font-mono: var(--font-geist-mono);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--text);
+}
+
+body {
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  background-image:
+    radial-gradient(1200px 600px at 80% -10%, rgb(183 255 69 / 0.08), transparent 50%),
+    radial-gradient(900px 500px at 10% 110%, rgb(255 184 77 / 0.05), transparent 45%),
+    linear-gradient(180deg, #08140f 0%, #07110d 40%, #06100c 100%);
+}
+
+body::before {
+  content: "";
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  opacity: 0.035;
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgb(255 255 255 / 0.08) 3px
+  );
+  z-index: 0;
+}
+
+#root-game {
+  position: relative;
+  z-index: 1;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+.display {
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+}
+
+.reel {
+  position: relative;
+  width: min(48vw, 200px);
+  height: 112px;
+  border-radius: 20px;
+  overflow: hidden;
+  background: linear-gradient(180deg, #15261e 0%, #0d1c16 100%);
+  border: 2px solid rgb(255 255 255 / 0.08);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06);
+}
+
+.reel.year {
+  box-shadow:
+    0 0 0 1px rgb(183 255 69 / 0.18),
+    0 0 28px rgb(183 255 69 / 0.18),
+    inset 0 1px 0 rgb(255 255 255 / 0.06);
+}
+
+.reel.band {
+  box-shadow:
+    0 0 0 1px rgb(255 184 77 / 0.2),
+    0 0 28px rgb(255 184 77 / 0.16),
+    inset 0 1px 0 rgb(255 255 255 / 0.06);
+}
+
+.reel.settled.year {
+  animation: pulse-lime 700ms var(--ease-out);
+}
+
+.reel.settled.band {
+  animation: pulse-amber 700ms var(--ease-out);
+}
+
+.reel-machine {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px 14px 14px;
+  border-radius: 28px;
+  border: 1px solid rgb(255 255 255 / 0.1);
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.04), rgb(0 0 0 / 0.22));
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.05);
+}
+
+.reel.band .reel-item {
+  font-size: 1.7rem;
+  letter-spacing: -0.03em;
+}
+
+.reel-window {
+  height: 100%;
+  overflow: hidden;
+  mask-image: linear-gradient(180deg, transparent, #000 18%, #000 82%, transparent);
+}
+
+.reel-strip {
+  will-change: transform;
+}
+
+.reel-item {
+  height: 112px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display), sans-serif;
+  font-size: 2.35rem;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+}
+
+.reel.spinning .reel-strip {
+  filter: blur(0.35px);
+}
+
+.vault {
+  position: relative;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.03), transparent 28%),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 11px,
+      rgb(183 255 69 / 0.035) 12px
+    ),
+    #0d1a14;
+  border: 1px solid rgb(255 255 255 / 0.08);
+  border-radius: 28px;
+  overflow: hidden;
+}
+
+.vault-mark {
+  position: absolute;
+  inset: 18% 16% 28%;
+  opacity: 0.11;
+  pointer-events: none;
+}
+
+.slot {
+  min-height: 74px;
+  border: 1.5px dashed rgb(255 255 255 / 0.14);
+  border-radius: 16px;
+  background: rgb(0 0 0 / 0.18);
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    transform 350ms var(--ease-out);
+}
+
+.slot.filled {
+  border-style: solid;
+  border-color: rgb(183 255 69 / 0.45);
+  background: linear-gradient(180deg, #1a3326, #13261d);
+}
+
+.slot.sealed {
+  background:
+    repeating-linear-gradient(
+      -18deg,
+      transparent,
+      transparent 6px,
+      rgb(183 255 69 / 0.05) 7px
+    ),
+    linear-gradient(180deg, #1a3326, #13261d);
+}
+
+.company-row {
+  border: 1px solid rgb(255 255 255 / 0.08);
+  background: linear-gradient(180deg, #162820, #12211b);
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    transform 80ms ease;
+}
+
+.company-row[aria-selected="true"] {
+  border-color: rgb(183 255 69 / 0.7);
+  box-shadow: 0 0 0 1px rgb(183 255 69 / 0.25), 0 0 24px rgb(183 255 69 / 0.12);
+}
+
+.pressable:active {
+  transform: scale(0.98);
+}
+
+.sheet-scrim {
+  background: rgb(4 10 8 / 0.72);
+  backdrop-filter: blur(10px);
+}
+
+.mono-tile {
+  font-family: var(--font-display), sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.05em;
+}
+
+@keyframes pulse-lime {
+  0% {
+    box-shadow: 0 0 0 1px rgb(183 255 69 / 0.7), 0 0 36px rgb(183 255 69 / 0.35);
+  }
+  100% {
+    box-shadow:
+      0 0 0 1px rgb(183 255 69 / 0.18),
+      0 0 28px rgb(183 255 69 / 0.18),
+      inset 0 1px 0 rgb(255 255 255 / 0.06);
+  }
+}
+
+@keyframes pulse-amber {
+  0% {
+    box-shadow: 0 0 0 1px rgb(255 184 77 / 0.8), 0 0 36px rgb(255 184 77 / 0.32);
+  }
+  100% {
+    box-shadow:
+      0 0 0 1px rgb(255 184 77 / 0.2),
+      0 0 28px rgb(255 184 77 / 0.16),
+      inset 0 1px 0 rgb(255 255 255 / 0.06);
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.rise-in {
+  animation: rise-in 380ms var(--ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reel-strip,
+  .slot,
+  .company-row,
+  .rise-in {
+    animation: none !important;
+    transition: none !important;
+    filter: none !important;
+  }
+}
