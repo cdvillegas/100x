@@ -1,4 +1,11 @@
-import type { GameView, PublicSession } from "./types";
+import type {
+  GameView,
+  LeaderboardBoard,
+  LeaderboardPeriod,
+  LeaderboardPlacement,
+  LeaderboardSubmitResult,
+  PublicSession,
+} from "./types";
 
 function requestId() {
   return crypto.randomUUID();
@@ -71,5 +78,37 @@ export async function pickGame(id: string, candidateId: string) {
 export async function revealGame(id: string) {
   return readJson<GameView>(
     await fetchJson(`/api/games/${id}/reveal`, { method: "POST" }),
+  );
+}
+
+export async function fetchLeaderboard(
+  period: LeaderboardPeriod,
+  gameId?: string,
+) {
+  const params = new URLSearchParams({ period });
+  if (gameId) params.set("gameId", gameId);
+  return readJson<{
+    board: LeaderboardBoard;
+    placements: LeaderboardPlacement[];
+  }>(await fetchJson(`/api/leaderboard?${params.toString()}`));
+}
+
+export async function submitLeaderboard(gameId: string, displayName: string) {
+  return readJson<LeaderboardSubmitResult>(
+    await fetchJson("/api/leaderboard", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ gameId, displayName }),
+    }),
+  );
+}
+
+export async function renameLeaderboard(displayName: string) {
+  return readJson<{ displayName: string }>(
+    await fetchJson("/api/leaderboard", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ displayName }),
+    }),
   );
 }

@@ -14,17 +14,20 @@ import {
   respinGame,
   revealGame,
   spinGame,
+  submitLeaderboard,
 } from "@/lib/api";
 import { formatHoldReturn } from "@/lib/format";
 import {
   PICK_STAKE,
   STARTING_BANKROLL,
   TARGET_BANKROLL,
+  type LeaderboardPlacement,
   type PublicCandidate,
   type PublicSession,
   type RevealPayload,
 } from "@/lib/types";
 import CompanyList from "./CompanyList";
+import Leaderboard from "./Leaderboard";
 import Reels from "./Reels";
 import Reveal from "./Reveal";
 import Sheets from "./Sheets";
@@ -32,6 +35,7 @@ import Vault from "./Vault";
 
 const GAME_KEY = "tenx-game-id";
 const INTRO_KEY = "100x-intro-seen-v2";
+const NAME_KEY = "100x-display-name";
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 
 type UiPhase =
@@ -67,12 +71,19 @@ export default function GameApp() {
   const [sheet, setSheet] = useState<"how" | "details" | "intro" | null>(
     null,
   );
+  const [showBoard, setShowBoard] = useState(false);
   const [detailId, setDetailId] = useState<string | null>(null);
   const [reveal, setReveal] = useState<RevealPayload | null>(null);
   const [revealIndex, setRevealIndex] = useState(0);
   const [skipped, setSkipped] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [bootError, setBootError] = useState<string | null>(null);
+  const [approvedName, setApprovedName] = useState<string | null>(null);
+  const [draftName, setDraftName] = useState("");
+  const [placements, setPlacements] = useState<LeaderboardPlacement[]>([]);
+  const [submittingBoard, setSubmittingBoard] = useState(false);
+  const [boardError, setBoardError] = useState<string | null>(null);
   const reducedMotion = useSyncExternalStore(
     subscribeToReducedMotion,
     getReducedMotion,
@@ -93,6 +104,8 @@ export default function GameApp() {
     setReveal(null);
     setRevealIndex(0);
     setSkipped(false);
+    setPlacements([]);
+    setBoardError(null);
     setPhase("ready");
   }, []);
 
@@ -117,15 +130,46 @@ export default function GameApp() {
             setRevealIndex(alreadyRevealed ? viewed.reveal?.picks.length ?? 5 : -1);
             setSkipped(alreadyRevealed);
             setPhase(alreadyRevealed ? "results" : "revealing");
+            const saved = localStorage.getItem(NAME_KEY);
+            if (alreadyRevealed && saved) {
+              void submitLeaderboard(viewed.id, saved)
+                .then((result) => {
+                  localStorage.setItem(NAME_KEY, result.displayName);
+                  setApprovedName(result.displayName);
+                  setPlacements(result.placements);
+                })
+                .catch((err) => {
+                  setBoardError(
+                    err instanceof Error ? err.message : "Board unavailable",
+                  );
+                });
+            }
           } else {
             setPhase(applySession(loaded));
           }
         } else {
           await startFresh();
         }
+        const savedName = localStorage.getItem(NAME_KEY);
+        if (savedName) {
+          setApprovedName(savedName);
+          setDraftName(savedName);
+        }
         if (!localStorage.getItem(INTRO_KEY)) setSheet("intro");
-      } catch {
-        if (!cancelled) await startFresh();
+      } catch (err) {
+        if (!cancelled) {
+          try {
+            await startFresh();
+          } catch (next) {
+            setBootError(
+              next instanceof Error
+                ? next.message
+                : err instanceof Error
+                  ? err.message
+                  : "Game storage is unavailable.",
+            );
+          }
+        }
       }
     })();
     return () => {
@@ -212,9 +256,31 @@ export default function GameApp() {
     }
   };
 
-  const advanceReveal = useCallback(() => {
-    setRevealIndex((current) => current + 1);
-  }, []);
+  const postToBoard = useCallback(
+    async (name: string) => {
+      if (!session || submittingBoard) return;
+      setSubmittingBoard(true);
+      setBoardError(null);
+      try {
+        const result = await submitLeaderboard(session.id, name);
+        localStorage.setItem(NAME_KEY, result.displayName);
+        setApprovedName(result.displayName);
+        setDraftName(result.displayName);
+        setPlacements(result.placements);
+      } catch (err) {
+        setBoardError(err instanceof Error ? err.message : "Board unavailable");
+      } finally {
+        setSubmittingBoard(false);
+      }
+    },
+    [session, submittingBoard],
+  );
+
+  const finishToResults = (name = approvedName) => {
+    setSkipped(true);
+    setPhase("results");
+    if (name) void postToBoard(name);
+  };
 
   const share = async () => {
     if (!reveal) return;
@@ -245,8 +311,20 @@ export default function GameApp() {
 
   if (!session || phase === "boot") {
     return (
-      <div className="flex min-h-dvh items-center justify-center text-muted">
-        Loading the vault…
+      <div className="flex min-h-dvh flex-col items-center justify-center gap-3 px-6 text-center text-muted">
+        <div>{bootError ?? "Loading the vault…"}</div>
+        {bootError ? (
+          <button
+            type="button"
+            className="rounded-full border border-white/10 px-4 py-2 text-xs tracking-[0.14em] text-ink"
+            onClick={() => {
+              setBootError(null);
+              void startFresh();
+            }}
+          >
+            TRY AGAIN
+          </button>
+        ) : null}
       </div>
     );
   }
@@ -257,9 +335,13 @@ export default function GameApp() {
         <div className="display text-2xl font-semibold tracking-tight">
           100<span className="text-lime">X</span>
         </div>
-        <div className="text-[10px] tracking-[0.16em] text-muted sm:text-xs sm:tracking-[0.18em]">
-          ROUND {session.round} OF 5
-        </div>
+        <button
+          type="button"
+          className="rounded-full border border-white/10 px-3 py-2 text-[10px] tracking-[0.14em] text-muted sm:text-xs"
+          onClick={() => setShowBoard(true)}
+        >
+          LEADERBOARD
+        </button>
         <button
           type="button"
           className="whitespace-nowrap rounded-full border border-white/10 px-2.5 py-2 text-[10px] tracking-[0.12em] text-muted sm:px-3 sm:text-xs sm:tracking-[0.14em]"
@@ -407,10 +489,22 @@ export default function GameApp() {
           index={revealIndex}
           skipped={skipped || phase === "results"}
           reducedMotion={reducedMotion}
-          onAdvance={advanceReveal}
+          placements={placements}
+          approvedName={approvedName}
+          draftName={draftName}
+          submitting={submittingBoard}
+          submitError={boardError}
+          onAdvance={() => {
+            setRevealIndex((current) => {
+              const next = current + 1;
+              if (reveal && next >= reveal.picks.length) {
+                finishToResults();
+              }
+              return next;
+            });
+          }}
           onSkip={() => {
-            setSkipped(true);
-            setPhase("results");
+            finishToResults();
           }}
           onAgain={() => {
             void startFresh();
@@ -418,6 +512,15 @@ export default function GameApp() {
           onShare={() => {
             void share();
           }}
+          onDraftName={setDraftName}
+          onSubmitName={() => {
+            void postToBoard(draftName);
+          }}
+          onRetry={() => {
+            if (approvedName) void postToBoard(approvedName);
+            else void postToBoard(draftName);
+          }}
+          onOpenBoard={() => setShowBoard(true)}
         />
       )}
 
@@ -426,6 +529,19 @@ export default function GameApp() {
         candidate={detailCandidate}
         onClose={sheet === "intro" ? closeIntro : () => setSheet(null)}
       />
+
+      {showBoard ? (
+        <Leaderboard
+          gameId={session.picks.length >= 5 ? session.id : undefined}
+          approvedName={approvedName}
+          onClose={() => setShowBoard(false)}
+          onRenamed={(name) => {
+            setApprovedName(name);
+            setDraftName(name);
+            localStorage.setItem(NAME_KEY, name);
+          }}
+        />
+      ) : null}
 
       <p className="sr-only">
         Target {TARGET_BANKROLL}. Entertainment only.

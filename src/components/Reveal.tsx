@@ -10,6 +10,7 @@ import {
 } from "@/lib/format";
 import type {
   BestPossiblePick,
+  LeaderboardPlacement,
   RevealPayload,
   RevealedPick,
 } from "@/lib/types";
@@ -152,24 +153,149 @@ function BestPossibleRow({ pick }: { pick: BestPossiblePick }) {
   );
 }
 
+function periodLabel(period: LeaderboardPlacement["period"]) {
+  if (period === "daily") return "Daily";
+  if (period === "weekly") return "Weekly";
+  return "All Time";
+}
+
+function PlacementCard({
+  placements,
+  approvedName,
+  draftName,
+  submitting,
+  error,
+  onDraftName,
+  onSubmitName,
+  onRetry,
+  onOpenBoard,
+}: {
+  placements: LeaderboardPlacement[];
+  approvedName: string | null;
+  draftName: string;
+  submitting: boolean;
+  error: string | null;
+  onDraftName: (value: string) => void;
+  onSubmitName: () => void;
+  onRetry: () => void;
+  onOpenBoard: () => void;
+}) {
+  const highlight = placements.find((item) => item.first) ?? placements.find((item) => item.topTen);
+
+  return (
+    <div className="mt-6 rounded-2xl border border-lime/35 bg-lime/[0.04] p-4">
+      <div className="text-[11px] tracking-[0.18em] text-lime">ON THE BOARD</div>
+      {placements.length > 0 ? (
+        <>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {placements.map((item) => (
+              <div
+                key={item.period}
+                className="rounded-full border border-white/10 px-3 py-1 text-sm"
+              >
+                #{item.rank} {periodLabel(item.period)}
+              </div>
+            ))}
+          </div>
+          <p className="mt-3 text-sm text-muted">
+            {highlight?.first
+              ? `You lead the ${periodLabel(highlight.period)} board.`
+              : highlight?.topTen
+                ? `You made the ${periodLabel(highlight.period)} top 10.`
+                : "Your run is posted. Picks stay sealed."}
+          </p>
+          <button
+            type="button"
+            className="mt-3 text-xs tracking-[0.14em] text-lime"
+            onClick={onOpenBoard}
+          >
+            VIEW LEADERBOARD
+          </button>
+        </>
+      ) : approvedName ? (
+        <div className="mt-3">
+          <p className="text-sm text-muted">
+            {error ?? "Posting your run to the board…"}
+          </p>
+          {error ? (
+            <button
+              type="button"
+              className="mt-3 text-xs tracking-[0.14em] text-lime"
+              onClick={onRetry}
+            >
+              TRY AGAIN
+            </button>
+          ) : null}
+        </div>
+      ) : (
+        <form
+          className="mt-3 grid gap-2"
+          onSubmit={(event) => {
+            event.preventDefault();
+            onSubmitName();
+          }}
+        >
+          <p className="text-sm text-muted">
+            Put your name on the board. Picks stay sealed.
+          </p>
+          <input
+            value={draftName}
+            onChange={(event) => onDraftName(event.target.value)}
+            maxLength={20}
+            autoComplete="nickname"
+            placeholder="Display name"
+            className="rounded-2xl border border-white/10 bg-[#07110d] px-4 py-3 text-ink outline-none"
+          />
+          {error ? <p className="text-sm text-coral">{error}</p> : null}
+          <button
+            type="submit"
+            disabled={submitting || draftName.trim().length < 2}
+            className="pressable rounded-2xl bg-lime py-3 text-sm font-bold tracking-[0.16em] text-[#10210f] disabled:opacity-40"
+          >
+            {submitting ? "POSTING" : "POST TO THE BOARD"}
+          </button>
+        </form>
+      )}
+    </div>
+  );
+}
+
 export default function Reveal({
   payload,
   index,
   skipped,
   reducedMotion,
+  placements,
+  approvedName,
+  draftName,
+  submitting,
+  submitError,
   onAdvance,
   onSkip,
   onAgain,
   onShare,
+  onDraftName,
+  onSubmitName,
+  onRetry,
+  onOpenBoard,
 }: {
   payload: RevealPayload;
   index: number;
   skipped: boolean;
   reducedMotion: boolean;
+  placements: LeaderboardPlacement[];
+  approvedName: string | null;
+  draftName: string;
+  submitting: boolean;
+  submitError: string | null;
   onAdvance: () => void;
   onSkip: () => void;
   onAgain: () => void;
   onShare: () => void;
+  onDraftName: (value: string) => void;
+  onSubmitName: () => void;
+  onRetry: () => void;
+  onOpenBoard: () => void;
 }) {
   const done = skipped || index >= payload.picks.length;
   const runningTotal =
@@ -255,6 +381,17 @@ export default function Reveal({
 
         {done ? (
           <div className="rise-in">
+            <PlacementCard
+              placements={placements}
+              approvedName={approvedName}
+              draftName={draftName}
+              submitting={submitting}
+              error={submitError}
+              onDraftName={onDraftName}
+              onSubmitName={onSubmitName}
+              onRetry={onRetry}
+              onOpenBoard={onOpenBoard}
+            />
             <div className="mt-6 rounded-2xl border border-amber/45 bg-amber/[0.045] p-4">
               <div className="text-[11px] tracking-[0.18em] text-amber">
                 BEST PORTFOLIO AVAILABLE

@@ -138,3 +138,34 @@ export interface RevealPayload {
 export interface GameView extends PublicSession {
   reveal: RevealPayload | null;
 }
+
+export type LeaderboardPeriod = "daily" | "weekly" | "all";
+
+export interface LeaderboardRow {
+  rank: number;
+  name: string;
+  bankroll: number;
+  multiplier: number;
+  completedAt: string;
+  isYou: boolean;
+}
+
+export interface LeaderboardPlacement {
+  period: LeaderboardPeriod;
+  rank: number;
+  total: number;
+  topTen: boolean;
+  first: boolean;
+}
+
+export interface LeaderboardBoard {
+  period: LeaderboardPeriod;
+  rows: LeaderboardRow[];
+  you: LeaderboardRow | null;
+  placement: LeaderboardPlacement | null;
+}
+
+export interface LeaderboardSubmitResult {
+  displayName: string;
+  placements: LeaderboardPlacement[];
+}
