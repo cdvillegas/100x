@@ -49,7 +49,7 @@ export default function Sheets({
     <div
       className={`sheet-scrim fixed inset-0 z-50 flex justify-center ${
         isIntro
-          ? "items-center overflow-y-auto bg-[#07110d] px-4 py-8"
+          ? "items-start overflow-y-auto bg-[#07110d] px-4 py-4 sm:py-8"
           : "items-end p-3 sm:items-center"
       }`}
     >
@@ -64,7 +64,7 @@ export default function Sheets({
       <div
         className={`relative z-10 w-full overflow-y-auto overscroll-contain border border-white/10 shadow-2xl ${
           isIntro
-            ? "max-w-2xl rounded-[32px] bg-[#0d1813] shadow-[0_0_80px_rgb(183_255_69/0.08)]"
+            ? "my-auto max-w-2xl shrink-0 rounded-[32px] bg-[#0d1813] shadow-[0_0_80px_rgb(183_255_69/0.08)]"
             : "max-h-[min(90dvh,40rem)] max-w-lg rounded-[28px] bg-[#101c17]"
         }`}
       >

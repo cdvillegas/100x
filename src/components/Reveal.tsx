@@ -192,20 +192,18 @@ export default function Reveal({
 
   return (
     <div className="fixed inset-0 z-40 overflow-y-auto bg-[#07110d]/96 px-4 py-6">
-      <div className="mx-auto min-h-full max-w-2xl">
+      <div className={`mx-auto min-h-full max-w-2xl ${done ? "pb-24" : ""}`}>
         <div className="mb-4 flex items-center justify-between text-xs tracking-[0.16em] text-muted">
-          <span>
-            {done
-              ? "YOUR RESULTS"
-              : index < 0
-                ? "GET READY"
-                : `REVEAL ${index + 1} OF ${payload.picks.length}`}
-          </span>
-          {!done ? (
-            <button type="button" onClick={onSkip} className="text-ink">
-              Skip reveal
-            </button>
-          ) : null}
+          <span>YOUR RESULTS</span>
+          <button
+            type="button"
+            onClick={onSkip}
+            disabled={done}
+            aria-hidden={done}
+            className={`text-ink ${done ? "invisible pointer-events-none" : ""}`}
+          >
+            Skip reveal
+          </button>
         </div>
 
         <div className="mb-4 rounded-2xl border border-lime/20 bg-lime/[0.025] px-4 py-3 sm:px-5 sm:py-4">
@@ -283,25 +281,30 @@ export default function Reveal({
                 </div>
               </div>
             </div>
-            <div className="mt-5 grid gap-3 sm:grid-cols-2">
-              <button
-                type="button"
-                className="pressable rounded-2xl bg-lime py-3.5 text-sm font-bold tracking-[0.16em] text-[#10210f]"
-                onClick={onAgain}
-              >
-                PLAY AGAIN
-              </button>
-              <button
-                type="button"
-                className="pressable rounded-2xl border border-white/15 py-3.5 text-sm font-semibold tracking-[0.16em]"
-                onClick={onShare}
-              >
-                SHARE RESULT
-              </button>
-            </div>
           </div>
         ) : null}
       </div>
+
+      {done ? (
+        <div className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-[#07110d]/92 backdrop-blur-md">
+          <div className="mx-auto flex max-w-2xl gap-3 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3">
+            <button
+              type="button"
+              className="pressable min-w-0 flex-1 rounded-2xl bg-lime py-3.5 text-sm font-bold tracking-[0.16em] text-[#10210f]"
+              onClick={onAgain}
+            >
+              PLAY AGAIN
+            </button>
+            <button
+              type="button"
+              className="pressable shrink-0 rounded-2xl border border-white/15 px-6 py-3.5 text-sm font-semibold tracking-[0.12em]"
+              onClick={onShare}
+            >
+              SHARE
+            </button>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

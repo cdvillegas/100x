@@ -23,7 +23,6 @@ import {
   type PublicCandidate,
   type PublicSession,
   type RevealPayload,
-  type SortKey,
 } from "@/lib/types";
 import CompanyList from "./CompanyList";
 import Reels from "./Reels";
@@ -65,7 +64,6 @@ export default function GameApp() {
   const [session, setSession] = useState<PublicSession | null>(null);
   const [phase, setPhase] = useState<UiPhase>("boot");
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [sort, setSort] = useState<SortKey>("mcap");
   const [sheet, setSheet] = useState<"how" | "details" | "intro" | null>(
     null,
   );
@@ -92,7 +90,6 @@ export default function GameApp() {
     localStorage.setItem(GAME_KEY, next.id);
     setSession(next);
     setSelectedId(null);
-    setSort("mcap");
     setReveal(null);
     setRevealIndex(0);
     setSkipped(false);
@@ -141,23 +138,27 @@ export default function GameApp() {
     setSheet(null);
   };
 
+  const beginSpinAnimation = (next: PublicSession) => {
+    setSession(next);
+    setSpinTarget("both");
+    setPhase("spinning");
+    const wait = reducedMotion ? 180 : 1380;
+    window.setTimeout(() => {
+      setPhase("choosing");
+      setBusy(false);
+      if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+        navigator.vibrate?.(12);
+      }
+    }, wait);
+  };
+
   const spin = async () => {
     if (!session || busy || phase !== "ready") return;
     setBusy(true);
     setError(null);
     try {
       const next = await spinGame(session.id);
-      setSession(next);
-      setSpinTarget("both");
-      setPhase("spinning");
-      const wait = reducedMotion ? 180 : 1380;
-      window.setTimeout(() => {
-        setPhase("choosing");
-        setBusy(false);
-        if (typeof navigator !== "undefined" && "vibrate" in navigator) {
-          navigator.vibrate?.(12);
-        }
-      }, wait);
+      beginSpinAnimation(next);
     } catch (err) {
       setBusy(false);
       setError(err instanceof Error ? err.message : "Spin failed");
@@ -188,6 +189,7 @@ export default function GameApp() {
   const lock = async () => {
     if (!session || !selectedId || busy) return;
     setBusy(true);
+    setError(null);
     try {
       const next = await pickGame(session.id, selectedId);
       setSession(next);
@@ -199,13 +201,14 @@ export default function GameApp() {
         setRevealIndex(-1);
         setSkipped(false);
         setPhase("revealing");
+        setBusy(false);
       } else {
-        setPhase("ready");
+        const spun = await spinGame(next.id);
+        beginSpinAnimation(spun);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Lock failed");
-    } finally {
       setBusy(false);
+      setError(err instanceof Error ? err.message : "Lock failed");
     }
   };
 
@@ -294,49 +297,52 @@ export default function GameApp() {
 
           {phase === "choosing" && board && (
             <div className="rise-in">
-              <div className="mb-3 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-3">
-                <div className="rounded-xl border border-lime/40 px-3 py-2 sm:rounded-2xl sm:px-4">
-                  <div className="text-[10px] tracking-[0.18em] text-lime">YEAR</div>
-                  <div className="display text-xl sm:text-2xl">{board.year}</div>
-                </div>
-                <div className="rounded-xl border border-amber/40 px-3 py-2 sm:rounded-2xl sm:px-4">
-                  <div className="text-[10px] tracking-[0.18em] text-amber">
-                    MARKET CAP
+              <div className="mb-3 grid grid-cols-2 gap-3">
+                <div className="grid gap-2">
+                  <div className="rounded-xl border border-lime/40 px-3 py-2 sm:rounded-2xl sm:px-4">
+                    <div className="text-[10px] tracking-[0.18em] text-lime">YEAR</div>
+                    <div className="display text-xl sm:text-2xl">{board.year}</div>
                   </div>
-                  <div className="display text-xl sm:text-2xl">{board.bandLabel}</div>
-                </div>
-                <div className="col-span-2 flex justify-end gap-2 sm:ml-auto">
                   <button
                     type="button"
                     disabled={session.yearRespinUsed || busy}
                     onClick={() => respin("year")}
-                    className="rounded-full border border-white/10 px-3 py-1.5 text-[10px] tracking-[0.1em] disabled:opacity-40 sm:py-2 sm:text-[11px] sm:tracking-[0.12em]"
+                    className="rounded-xl border border-lime/30 bg-lime/[0.045] px-3 py-2 text-[10px] font-semibold tracking-[0.12em] text-lime disabled:opacity-35 sm:rounded-2xl sm:text-[11px]"
                   >
-                    {session.yearRespinUsed ? "YEAR USED" : "YEAR RESPIN"}
+                    {session.yearRespinUsed ? "YEAR RESPIN USED" : "RESPIN YEAR"}
                   </button>
+                </div>
+                <div className="grid gap-2">
+                  <div className="rounded-xl border border-amber/40 px-3 py-2 sm:rounded-2xl sm:px-4">
+                    <div className="text-[10px] tracking-[0.18em] text-amber">
+                      MARKET CAP
+                    </div>
+                    <div className="display text-xl sm:text-2xl">{board.bandLabel}</div>
+                  </div>
                   <button
                     type="button"
                     disabled={session.rankRespinUsed || busy}
                     onClick={() => respin("rank")}
-                    className="rounded-full border border-white/10 px-3 py-1.5 text-[10px] tracking-[0.1em] disabled:opacity-40 sm:py-2 sm:text-[11px] sm:tracking-[0.12em]"
+                    className="rounded-xl border border-amber/30 bg-amber/[0.045] px-3 py-2 text-[10px] font-semibold tracking-[0.12em] text-amber disabled:opacity-35 sm:rounded-2xl sm:text-[11px]"
                   >
-                    {session.rankRespinUsed ? "RANK USED" : "RANK RESPIN"}
+                    {session.rankRespinUsed ? "RANK RESPIN USED" : "RESPIN RANK"}
                   </button>
                 </div>
               </div>
               <p className="mb-4 hidden text-sm text-muted sm:block">{prompt}</p>
               {board.climate && (
                 <>
-                  <details
-                    open
-                    className="mb-3 rounded-xl border border-white/10 px-4 py-3 lg:hidden"
-                  >
+                  <details className="group mb-3 rounded-xl border border-white/10 px-4 py-3 lg:hidden">
                     <summary className="cursor-pointer list-none">
                       <span className="block text-[11px] tracking-[0.16em] text-amber">
                         {board.year} · WORLD THEN
                       </span>
                       <span className="display mt-1 block text-lg text-ink">
                         {board.climate.kicker}
+                      </span>
+                      <span className="mt-2 block text-[10px] tracking-[0.14em] text-muted">
+                        <span className="group-open:hidden">READ CONTEXT +</span>
+                        <span className="hidden group-open:inline">CLOSE −</span>
                       </span>
                     </summary>
                     <p className="mt-2 text-sm leading-6 text-muted">
@@ -358,37 +364,36 @@ export default function GameApp() {
               <CompanyList
                 candidates={board.candidates}
                 selectedId={selectedId}
-                sort={sort}
                 onSelect={setSelectedId}
                 onDetails={(id) => {
                   setDetailId(id);
                   setSheet("details");
                 }}
-                onSort={setSort}
               />
             </div>
           )}
 
-          {phase === "choosing" && (
-            <div className="fixed inset-x-0 bottom-0 z-30 flex justify-center border-t border-white/10 bg-[#07110d]/92 px-4 py-3 backdrop-blur-md lg:static lg:mt-4 lg:block lg:border-0 lg:bg-transparent lg:p-0 lg:backdrop-blur-0">
-              <button
-                type="button"
-                disabled={!selected || busy}
-                onClick={lock}
-                className="pressable w-full max-w-3xl rounded-2xl bg-lime py-3.5 text-sm font-bold tracking-[0.16em] text-[#10210f] disabled:opacity-40 lg:max-w-none"
-              >
-                {selected
-                  ? `LOCK IN ${selected.name.toUpperCase()}`
-                  : "SELECT A COMPANY"}
-              </button>
-            </div>
-          )}
         </main>
 
         <aside className="hidden lg:block lg:sticky lg:top-20">
           <Vault picks={session.picks} />
         </aside>
       </div>
+
+      {phase === "choosing" && selected && (
+        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-white/10 bg-[#07110d]/92 backdrop-blur-md">
+          <div className="mx-auto grid max-w-[1280px] px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 sm:px-4 lg:grid-cols-[minmax(0,1fr)_400px] lg:gap-8 xl:grid-cols-[minmax(0,1fr)_420px]">
+            <button
+              type="button"
+              disabled={busy}
+              onClick={lock}
+              className="pressable w-full rounded-2xl bg-lime py-3.5 text-sm font-bold tracking-[0.16em] text-[#10210f] disabled:opacity-40"
+            >
+              LOCK IN {selected.name.toUpperCase()}
+            </button>
+          </div>
+        </div>
+      )}
 
       {error && (
         <div className="fixed bottom-24 left-1/2 z-40 -translate-x-1/2 rounded-full bg-coral/15 px-4 py-2 text-sm text-coral">
