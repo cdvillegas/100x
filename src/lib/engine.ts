@@ -3,6 +3,7 @@ import {
   BOARDS,
   getBoard,
   getSealed,
+  oracleCandidate,
   oracleReturn,
   toPublicBoard,
 } from "./data/boards";
@@ -11,6 +12,7 @@ import {
   PICKS_PER_RUN,
   PICK_STAKE,
   STARTING_BANKROLL,
+  type BestPossiblePick,
   type GameView,
   type LockedPick,
   type PublicSession,
@@ -223,6 +225,7 @@ export function reveal(session: SessionRecord): RevealPayload {
   session.revealed = true;
 
   const revealed: RevealedPick[] = [];
+  const bestPossiblePicks: BestPossiblePick[] = [];
   let bankroll = 0;
   const oracleReturns: number[] = [];
 
@@ -231,8 +234,21 @@ export function reveal(session: SessionRecord): RevealPayload {
     if (!sealed) throw new Error("Missing sealed outcome");
     const { board, candidate, forwardRank } = sealed;
     const todayValue = positionToday(candidate.forwardTotalReturn);
+    const bestCandidate = oracleCandidate(board);
     bankroll += todayValue;
     oracleReturns.push(oracleReturn(board));
+    bestPossiblePicks.push({
+      boardId: board.id,
+      candidateId: bestCandidate.id,
+      name: bestCandidate.name,
+      ticker: bestCandidate.ticker,
+      year: board.year,
+      bandLabel: board.bandLabel,
+      entryBankroll: PICK_STAKE,
+      todayValue: positionToday(bestCandidate.forwardTotalReturn),
+      forwardTotalReturn: bestCandidate.forwardTotalReturn,
+      wasSelected: bestCandidate.id === candidate.id,
+    });
     revealed.push({
       boardId: board.id,
       candidateId: candidate.id,
@@ -257,6 +273,7 @@ export function reveal(session: SessionRecord): RevealPayload {
 
   return {
     picks: revealed,
+    bestPossiblePicks,
     endingBankroll,
     multiplier,
     tier: outcomeTier(multiplier),

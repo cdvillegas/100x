@@ -8,7 +8,11 @@ import {
   signedClass,
   tierLabel,
 } from "@/lib/format";
-import type { RevealPayload, RevealedPick } from "@/lib/types";
+import type {
+  BestPossiblePick,
+  RevealPayload,
+  RevealedPick,
+} from "@/lib/types";
 import { TARGET_BANKROLL } from "@/lib/types";
 
 function CountUp({
@@ -77,8 +81,41 @@ function PickCard({
         {pick.beatBoard ? "Beat the board" : "Trailed the board"}
       </div>
       {pick.outcomeNotes ? (
-        <p className="mt-3 text-sm leading-6 text-ink/90">{pick.outcomeNotes}</p>
+        <div className="mt-3">
+          <div className="text-[10px] tracking-[0.18em] text-lime/80">
+            WHAT HAPPENED NEXT
+          </div>
+          <p className="mt-1.5 text-sm leading-6 text-ink/90">
+            {pick.outcomeNotes}
+          </p>
+        </div>
       ) : null}
+    </div>
+  );
+}
+
+function BestPossibleRow({ pick }: { pick: BestPossiblePick }) {
+  return (
+    <div className="flex items-center justify-between gap-4 border-b border-amber/15 py-3 last:border-0">
+      <div className="min-w-0">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="display text-lg">{pick.name}</span>
+          {pick.wasSelected ? (
+            <span className="rounded-full border border-lime/30 bg-lime/10 px-2 py-0.5 text-[9px] tracking-[0.14em] text-lime">
+              YOU PICKED IT
+            </span>
+          ) : null}
+        </div>
+        <div className="text-xs text-muted">
+          {pick.ticker} · {pick.year} · {pick.bandLabel}
+        </div>
+      </div>
+      <div className="shrink-0 text-right">
+        <div className="display text-xl text-amber">
+          {formatHoldReturn(pick.forwardTotalReturn)}
+        </div>
+        <div className="text-xs text-muted">{formatMoney(pick.todayValue)}</div>
+      </div>
     </div>
   );
 }
@@ -170,7 +207,7 @@ export default function Reveal({
                 <div className="display text-2xl">{payload.beatTheBoard}/5</div>
               </div>
               <div className="rounded-2xl border border-white/10 p-3">
-                Modeled oracle
+                Hindsight ceiling
                 <div className="display text-2xl">
                   {formatMoney(payload.oracleBankroll)}
                 </div>
@@ -180,6 +217,34 @@ export default function Reveal({
               {payload.picks.map((pick) => (
                 <PickCard key={pick.candidateId} pick={pick} active={false} />
               ))}
+            </div>
+            <div className="mt-6 rounded-2xl border border-amber/45 bg-amber/[0.045] p-4">
+              <div className="text-[11px] tracking-[0.18em] text-amber">
+                BEST PORTFOLIO YOU COULD&apos;VE BUILT
+              </div>
+              <p className="mt-1 text-xs leading-5 text-muted">
+                The highest modeled-value company available on each of the five
+                boards you spun—not a perfect pick from the entire market.
+              </p>
+              <div className="mt-2">
+                {payload.bestPossiblePicks.map((pick) => (
+                  <BestPossibleRow key={pick.boardId} pick={pick} />
+                ))}
+              </div>
+              <div className="mt-3 flex items-end justify-between gap-4 border-t border-amber/25 pt-3">
+                <div>
+                  <div className="text-xs text-muted">Hindsight bankroll</div>
+                  <div className="display text-3xl text-amber">
+                    {formatMoney(payload.oracleBankroll)}
+                  </div>
+                </div>
+                <div className="text-right text-xs leading-5 text-muted">
+                  {formatMoney(
+                    Math.max(0, payload.oracleBankroll - payload.endingBankroll),
+                  )}{" "}
+                  beyond your picks
+                </div>
+              </div>
             </div>
             <p className="mt-4 hidden text-xs text-muted">{summary}</p>
             <div className="mt-5 grid gap-3">

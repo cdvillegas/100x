@@ -1,4 +1,8 @@
 import type { SectorKey } from "../types";
+import {
+  companyAfterStory,
+  companyThenStory,
+} from "./company-stories";
 import { sectorOf } from "./sectors";
 
 export interface EraClimate {
@@ -181,7 +185,8 @@ const SECTOR_CONTEXT: Record<number, Record<SectorKey, string>> = {
   },
 };
 
-const THEN: Record<string, string> = {
+/** @deprecated Retained as an editorial reference for the original curated copy. */
+export const THEN: Record<string, string> = {
   "2000:AAPL":
     "Steve Jobs has returned Apple to profit with the colorful iMac, but it remains a small computer maker in a Windows-dominated market. Its recovery is real; a broader platform is not.",
   "2003:AAPL":
@@ -306,7 +311,8 @@ const THEN: Record<string, string> = {
     "The boring giant of American health insurance plus a clinic-and-pharmacy empire. Policy risk is always in the footnotes.",
 };
 
-const AFTER: Record<string, string> = {
+/** @deprecated Retained as an editorial reference for the original curated copy. */
+export const AFTER: Record<string, string> = {
   "2000:AAPL":
     "A computer company became a phone company, then a services company. The multiple is the iPhone era, not the iMac.",
   "2003:AAPL":
@@ -383,7 +389,8 @@ const AFTER: Record<string, string> = {
     "Streaming was still a dare against cable. Originals and global scale worked until everyone else copied the homework.",
 };
 
-function sectorThen(year: number, ticker: string, name: string): string {
+/** @deprecated Company timelines now provide complete coverage. */
+export function sectorThen(year: number, ticker: string, name: string): string {
   const questions: Record<SectorKey, string> = {
     technology:
       "Its products can scale quickly, but leadership changes quickly too; the test is whether customers are locked into a durable platform or simply buying the current cycle.",
@@ -405,7 +412,8 @@ function sectorThen(year: number, ticker: string, name: string): string {
   return `${name} enters ${year} as one of the largest public companies in its field. ${questions[sectorOf(ticker)]}`;
 }
 
-function generatedAfter(year: number, name: string, multiple: number): string {
+/** @deprecated Company timelines now provide complete coverage. */
+export function generatedAfter(year: number, name: string, multiple: number): string {
   if (multiple <= 0) {
     return `The gameplay model assigns no remaining value to this ${name} position. It does not identify a specific bankruptcy, acquisition, or corporate-action path.`;
   }
@@ -427,19 +435,15 @@ function generatedAfter(year: number, name: string, multiple: number): string {
   return `The modeled ${name} position exceeds 15X from its ${year} entry. Treat the magnitude as gameplay data until a sourced return series replaces it.`;
 }
 
-export function thenStory(year: number, ticker: string, name: string): string {
-  const key = `${year}:${ticker.replace(/2$/, "")}`;
-  return THEN[key] ?? sectorThen(year, ticker.replace(/2$/, ""), name);
+export function thenStory(year: number, ticker: string): string {
+  return companyThenStory(year, ticker);
 }
 
 export function afterStory(
   year: number,
   ticker: string,
-  name: string,
-  multiple: number,
 ): string {
-  const key = `${year}:${ticker.replace(/2$/, "")}`;
-  return AFTER[key] ?? generatedAfter(year, name, multiple);
+  return companyAfterStory(year, ticker);
 }
 
 export function yearClimate(year: number): EraClimate {

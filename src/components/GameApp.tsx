@@ -26,7 +26,7 @@ import Sheets from "./Sheets";
 import Vault from "./Vault";
 
 const GAME_KEY = "tenx-game-id";
-const INTRO_KEY = "tenx-intro-seen";
+const INTRO_KEY = "100x-intro-seen-v2";
 
 type UiPhase =
   | "boot"
@@ -214,6 +214,7 @@ export default function GameApp() {
       `100X`,
       `$${STARTING_BANKROLL.toLocaleString()} → ${Math.round(reveal.endingBankroll).toLocaleString()}`,
       `${reveal.multiplier.toFixed(2)}X · Beat the Board ${reveal.beatTheBoard}/5`,
+      `Best possible from my boards: $${Math.round(reveal.oracleBankroll).toLocaleString()}`,
       ...reveal.picks.map(
         (pick) => `${pick.ticker} ${pick.year}  ${formatHoldReturn(pick.forwardTotalReturn)}`,
       ),

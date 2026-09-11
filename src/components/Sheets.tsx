@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { formatCompact, formatPct, formatPe } from "@/lib/format";
 import type { PublicCandidate } from "@/lib/types";
 
@@ -15,6 +16,23 @@ function Row({ label, value, hint }: { label: string; value: string; hint: strin
   );
 }
 
+function TutorialStep({
+  number,
+  children,
+}: {
+  number: number;
+  children: ReactNode;
+}) {
+  return (
+    <li className="flex gap-3">
+      <span className="display flex size-7 shrink-0 items-center justify-center rounded-full bg-lime text-sm font-bold text-[#10210f]">
+        {number}
+      </span>
+      <span className="pt-0.5 text-sm leading-6 text-ink/90">{children}</span>
+    </li>
+  );
+}
+
 export default function Sheets({
   kind,
   candidate,
@@ -25,33 +43,74 @@ export default function Sheets({
   onClose: () => void;
 }) {
   if (!kind) return null;
+  const isIntro = kind === "intro";
 
   return (
-    <div className="sheet-scrim fixed inset-0 z-50 flex items-end justify-center p-3 sm:items-center">
-      <button
-        type="button"
-        className="absolute inset-0"
-        aria-label="Close"
-        onClick={onClose}
-      />
-      <div className="relative z-10 w-full max-w-lg max-h-[min(90dvh,40rem)] overflow-y-auto overscroll-contain rounded-[28px] border border-white/10 bg-[#101c17] shadow-2xl">
-        <div className="p-5">
+    <div
+      className={`sheet-scrim fixed inset-0 z-50 flex justify-center ${
+        isIntro
+          ? "items-center overflow-y-auto bg-[#07110d] px-4 py-8"
+          : "items-end p-3 sm:items-center"
+      }`}
+    >
+      {!isIntro ? (
+        <button
+          type="button"
+          className="absolute inset-0"
+          aria-label="Close"
+          onClick={onClose}
+        />
+      ) : null}
+      <div
+        className={`relative z-10 w-full overflow-y-auto overscroll-contain border border-white/10 shadow-2xl ${
+          isIntro
+            ? "max-w-2xl rounded-[32px] bg-[#0d1813] shadow-[0_0_80px_rgb(183_255_69/0.08)]"
+            : "max-h-[min(90dvh,40rem)] max-w-lg rounded-[28px] bg-[#101c17]"
+        }`}
+      >
+        <div className={isIntro ? "p-6 sm:p-9" : "p-5"}>
         {kind === "intro" && (
-          <div className="space-y-4">
-            <div className="display text-3xl font-semibold">100X</div>
-            <p className="text-lg leading-7">
-              One spin locks a year and a market-cap band.
-              <br />
-              Pick from a modeled snapshot of large U.S. companies.
-              <br />
-              One estimated long-term hold. One shot at 100X.
-            </p>
+          <div>
+            <div className="text-center">
+              <div className="display text-5xl font-semibold tracking-tight sm:text-6xl">
+                100<span className="text-lime">X</span>
+              </div>
+              <p className="mt-2 text-xs tracking-[0.24em] text-muted">
+                PICK FIVE STOCKS FROM THE PAST
+              </p>
+              <div className="mt-7 text-[11px] tracking-[0.2em] text-lime">
+                YOUR BANKROLL
+              </div>
+              <div className="display mt-1 text-4xl">$10,000</div>
+            </div>
+            <ol className="mt-7 space-y-3 rounded-2xl border border-white/10 bg-white/[0.025] p-4 sm:p-5">
+              <TutorialStep number={1}>
+                <strong className="text-ink">Spin once</strong> to draw a year
+                and one market-cap band from the historical Top 100.
+              </TutorialStep>
+              <TutorialStep number={2}>
+                Pick <strong className="text-ink">one of ten companies</strong>.
+                You only see what an investor could have known then.
+              </TutorialStep>
+              <TutorialStep number={3}>
+                Make five picks at <strong className="text-ink">$2,000 each</strong>.
+                You get one Year Respin and one Rank Respin for the whole run.
+              </TutorialStep>
+              <TutorialStep number={4}>
+                Every position is held until today. Returns stay sealed until
+                all five choices are locked.
+              </TutorialStep>
+              <TutorialStep number={5}>
+                Reach <strong className="text-amber">$1,000,000</strong> to hit
+                100X—then see the best portfolio your five boards allowed.
+              </TutorialStep>
+            </ol>
             <button
               type="button"
-              className="pressable mt-2 w-full rounded-2xl bg-lime py-3.5 text-sm font-bold tracking-[0.16em] text-[#10210f]"
+              className="pressable mt-7 w-full rounded-2xl bg-lime py-4 text-sm font-bold tracking-[0.2em] text-[#10210f] shadow-[0_0_32px_rgb(183_255_69/0.28)]"
               onClick={onClose}
             >
-              START
+              START THE RUN
             </button>
           </div>
         )}
@@ -70,7 +129,7 @@ export default function Sheets({
           <div className="space-y-3 text-sm leading-6">
             <h2 className="display text-2xl">Methodology</h2>
             <p>Historical prose is anchored to each entry date. Company names and descriptions change when major mergers, renamings, or business shifts would otherwise create hindsight.</p>
-            <p>World and sector notes draw on contemporaneous Federal Reserve, IMF, World Bank, and WTO reporting plus documented company history. They are context—not a peek at later returns.</p>
+            <p>World and sector notes draw on contemporaneous Federal Reserve, IMF, World Bank, and WTO reporting. Every company card uses dated products, deals, leadership changes, and other documented company history available by that entry date—not a peek at later returns.</p>
             <p>Market-cap ranks, financials, and long-term values combine manually curated estimates with deterministic modeled data. They are not licensed quotes, audited point-in-time fundamentals, or verified total-return series.</p>
             <p>Historical simulation for entertainment only. Not investment advice. No real money or trading.</p>
           </div>
@@ -88,7 +147,7 @@ export default function Sheets({
             </div>
             <div className="mt-4 rounded-2xl border border-amber/25 bg-[#1a2414] p-4">
               <div className="text-[11px] tracking-[0.18em] text-amber">
-                {candidate.name.toUpperCase()} · {candidate.year}
+                AT THE TIME · {candidate.year}
               </div>
               <p className="mt-2 text-sm leading-6">{candidate.thenStory}</p>
             </div>

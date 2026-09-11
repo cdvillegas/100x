@@ -52,7 +52,7 @@ function toCandidate(
     name: firm.name,
     ticker: firm.ticker,
     description: firm.description,
-    thenStory: thenStory(year, ticker, firm.name),
+    thenStory: thenStory(year, ticker),
     sector,
     sectorLabel: sectorLabel(sector),
     sectorContext: sectorContext(year, sector),
@@ -64,7 +64,7 @@ function toCandidate(
     peRatio: pe,
     trailingReturn: pct(trailPct),
     forwardTotalReturn: fwd,
-    outcomeNotes: afterStory(year, ticker, firm.name, 1 + fwd),
+    outcomeNotes: afterStory(year, ticker),
   };
 }
 
@@ -174,5 +174,11 @@ export function getSealed(candidateId: string) {
 }
 
 export function oracleReturn(board: FullBoard): number {
-  return Math.max(...board.candidates.map((c) => c.forwardTotalReturn));
+  return oracleCandidate(board).forwardTotalReturn;
+}
+
+export function oracleCandidate(board: FullBoard): FullCandidate {
+  return board.candidates.reduce((best, candidate) =>
+    candidate.forwardTotalReturn > best.forwardTotalReturn ? candidate : best,
+  );
 }

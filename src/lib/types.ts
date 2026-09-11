@@ -108,6 +108,13 @@ export interface RevealedPick extends LockedPick {
   yearsHeld: number;
 }
 
+export interface BestPossiblePick extends LockedPick {
+  entryBankroll: number;
+  todayValue: number;
+  forwardTotalReturn: number;
+  wasSelected: boolean;
+}
+
 export interface PublicSession {
   id: string;
   round: number;
@@ -120,6 +127,7 @@ export interface PublicSession {
 
 export interface RevealPayload {
   picks: RevealedPick[];
+  bestPossiblePicks: BestPossiblePick[];
   endingBankroll: number;
   multiplier: number;
   tier: OutcomeTier;
