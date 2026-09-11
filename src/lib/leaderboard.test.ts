@@ -4,9 +4,11 @@ import { BOARDS } from "./data/boards";
 import type { SessionRecord } from "./engine";
 import {
   assignRanks,
+  bestPerPlayer,
   buildBoard,
   hasPrivateFields,
   inPeriod,
+  isPersonalBest,
   periodBounds,
   sanitizeLeaderboardPayload,
   scoreCompletedRun,
@@ -77,6 +79,35 @@ test("equal scores share a rank while earlier finishes sort first", () => {
   assert.equal(ranks.get("a"), 1);
   assert.equal(ranks.get("b"), 1);
   assert.equal(ranks.get("c"), 3);
+});
+
+test("one row per player keeps the best run", () => {
+  const entries = [
+    entry("worse", "p1", 40_000, "2026-09-10T12:00:00.000Z", "Ada"),
+    entry("best", "p1", 80_000, "2026-09-10T11:00:00.000Z", "Ada"),
+    entry("other", "p2", 50_000, "2026-09-10T10:00:00.000Z", "Bea"),
+  ];
+  assert.equal(bestPerPlayer(entries).length, 2);
+
+  const board = buildBoard(entries, "all", "p1", "worse");
+  assert.equal(board.rows.length, 2);
+  assert.equal(board.rows.filter((row) => row.isYou).length, 1);
+  assert.equal(board.rows[0].isYou, true);
+  assert.equal(board.rows[0].bankroll, 80_000);
+  assert.equal(board.you?.bankroll, 80_000);
+  assert.equal(board.you?.rank, 1);
+  assert.equal(board.placement?.total, 2);
+});
+
+test("personal best is the player's best run, not every finish", () => {
+  const entries = [
+    entry("first", "p1", 40_000, "2026-09-10T10:00:00.000Z"),
+    entry("best", "p1", 90_000, "2026-09-10T12:00:00.000Z"),
+    entry("other", "p2", 120_000, "2026-09-10T11:00:00.000Z"),
+  ];
+  assert.equal(isPersonalBest(entries, "p1", "best"), true);
+  assert.equal(isPersonalBest(entries, "p1", "first"), false);
+  assert.equal(isPersonalBest(entries, "p2", "other"), true);
 });
 
 test("duplicate display names are allowed and your run stays pinned", () => {

@@ -2,12 +2,14 @@ import { getOwnedSession } from "./store";
 import {
   approvedName,
   buildBoard,
+  isPersonalBest,
   scoreCompletedRun,
   type LeaderboardBoard,
   type LeaderboardEntry,
   type LeaderboardPeriod,
   type PeriodPlacement,
 } from "./leaderboard";
+import { nameForSubmit } from "./names";
 import {
   getEntry,
   insertEntry,
@@ -20,7 +22,7 @@ export async function submitRun(
   playerId: string,
   displayName: unknown,
 ) {
-  const name = approvedName(displayName);
+  const name = nameForSubmit(displayName);
   const existing = await getEntry(gameId);
   if (existing) {
     if (existing.playerId !== playerId) {
@@ -68,7 +70,12 @@ export async function loadBoards(
       ),
     ]),
   ) as Record<LeaderboardPeriod, LeaderboardBoard>;
-  return boards;
+  return {
+    boards,
+    personalBest: Boolean(
+      playerId && gameId && isPersonalBest(entries, playerId, gameId),
+    ),
+  };
 }
 
 export function placementsFromBoards(

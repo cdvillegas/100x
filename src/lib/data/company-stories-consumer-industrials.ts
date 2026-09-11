@@ -10,7 +10,7 @@ export const CONSUMER_INDUSTRIAL_STORIES: Record<
     moments: [
       {
         year: 2000,
-        then: "Sam Walton's supercenter formula now blankets the country, and groceries are making the weekly Walmart trip routine; critics increasingly target wages, suppliers, and small-town competitors.",
+        then: "Walmart's supercenter formula now blankets the country, and groceries are making the weekly trip routine; critics increasingly target wages, suppliers, and small-town competitors.",
         after: "Walmart had expanded from discount stores into supercenters and become the largest U.S. grocer by the end of the 1990s.",
       },
       {
@@ -39,13 +39,13 @@ export const CONSUMER_INDUSTRIAL_STORIES: Record<
     moments: [
       {
         year: 2000,
-        then: "Arthur Blank is succeeding cofounder Bernie Marcus atop a fast-growing chain whose cavernous stores, lumber aisles, and orange aprons have rewritten home improvement retail.",
-        after: "Home Depot had spent the 1990s rapidly opening warehouse-format stores and had elevated Arthur Blank to chief executive.",
+        then: "Cofounder Arthur Blank is CEO of a fast-growing chain whose cavernous stores, lumber aisles, and orange aprons have rewritten home improvement retail, with Bernie Marcus still a visible chairman.",
+        after: "Home Depot had spent the 1990s rapidly opening warehouse-format stores; in December 2000 it hired GE's Bob Nardelli as chief executive, with Blank moving to co-chairman.",
       },
       {
         year: 2008,
         then: "Frank Blake is repairing stores after the Bob Nardelli era, HD Supply has been sold, and the collapsing housing market is pressuring big-ticket renovation demand.",
-        after: "Home Depot had replaced Bob Nardelli with Frank Blake, sold HD Supply, and begun restoring store-level service as housing weakened.",
+        after: "Home Depot hired GE's Bob Nardelli as chief executive in December 2000; by 2008 it had replaced him with Frank Blake, sold HD Supply, and begun restoring store-level service as housing weakened.",
       },
       {
         year: 2016,
@@ -199,7 +199,7 @@ export const CONSUMER_INDUSTRIAL_STORIES: Record<
       },
       {
         year: 2016,
-        then: "Lafley has returned and is handing the company to David Taylor after agreeing to sell dozens of beauty brands to Coty; management is concentrating resources on fewer daily-use categories.",
+        then: "David Taylor is chief executive as P&G agrees to sell dozens of beauty brands to Coty; management is concentrating resources on fewer daily-use categories.",
         after: "P&G had agreed to divest a large collection of beauty brands and had named David Taylor chief executive.",
       },
       {
@@ -397,8 +397,8 @@ export const CONSUMER_INDUSTRIAL_STORIES: Record<
       },
       {
         year: 2003,
-        then: "Comparable sales have weakened, the Made for You kitchen has not fixed service, and Jim Cantalupo is returning to run a 'Plan to Win' centered on existing restaurants.",
-        after: "McDonald's had warned that it expected its first quarterly loss and had brought Jim Cantalupo back as chief executive at the start of 2003.",
+        then: "Comparable sales have weakened, the Made for You kitchen has not fixed service, and Jim Cantalupo is returning to restore growth by focusing on existing restaurants rather than relentless expansion.",
+        after: "McDonald's had warned of its first quarterly loss, brought Jim Cantalupo back as chief executive, and soon launched a Plan to Win focused on existing restaurants.",
       },
       {
         year: 2016,
@@ -450,7 +450,7 @@ export const CONSUMER_INDUSTRIAL_STORIES: Record<
     moments: [
       {
         year: 2000,
-        then: "Michael Jordan's playing career has paused, Nike Air is mature, and Phil Knight is trying to restore product energy while factory labor practices remain a global reputational wound.",
+        then: "Phil Knight is trying to restore product energy as Nike Air matures, while factory labor practices remain under global scrutiny after the 1990s controversies.",
         after: "Nike had responded to sweatshop criticism with new labor standards and had built basketball, running, and global football franchises around athlete endorsements.",
       },
       {
@@ -601,7 +601,7 @@ export const CONSUMER_INDUSTRIAL_STORIES: Record<
       {
         year: 2008,
         then: "Jeff Immelt's infrastructure order book looks formidable, but GE Capital relies on short-term funding and exposes the industrial icon to a credit market already showing fractures.",
-        after: "GE had expanded infrastructure operations while retaining a large finance arm whose funding and asset quality were increasingly important.",
+        after: "GE Capital required a federal lifeline in 2008, and the industrial businesses spent years dealing with the finance arm's funding shock and later asset sales.",
       },
       {
         year: 2016,
@@ -634,7 +634,7 @@ export const CONSUMER_INDUSTRIAL_STORIES: Record<
       },
       {
         year: 2016,
-        then: "Carlos Rodriguez is selling Dealer Services as CDK Global and pushing cloud platforms such as RUN and Vantage; Workday, Paycom, and smaller software vendors attack from different ends.",
+        then: "Carlos Rodriguez is pushing cloud platforms such as RUN and Vantage after spinning off Dealer Services as CDK Global; Workday, Paycom, and smaller software vendors attack from different ends.",
         after: "ADP had spun off CDK Global in 2014 and concentrated on employer services and professional-employer-organization offerings.",
       },
       {
@@ -813,8 +813,8 @@ export const CONSUMER_INDUSTRIAL_STORIES: Record<
       },
       {
         year: 2023,
-        then: "Lal Karsanbhai has sold a majority stake in Climate Technologies to Blackstone and agreed to buy National Instruments, recasting Emerson as a focused automation company.",
-        after: "Emerson had reached transactions to separate Climate Technologies and acquire National Instruments after an extended pursuit.",
+        then: "Lal Karsanbhai has agreed to sell a majority stake in Climate Technologies to Blackstone, recasting Emerson around automation as the sale proceeds remain pending.",
+        after: "Emerson completed the Climate Technologies sale in 2023, acquired National Instruments after an extended pursuit, and continued simplifying around automation software and hardware.",
       },
     ],
     recentArc:
@@ -942,42 +942,13 @@ export const CONSUMER_INDUSTRIAL_STORIES: Record<
       "Through 2024, ITW continued its 80/20 operating system, selective pricing, and customer-backed product development while automotive production normalized and European industrial demand softened.",
   },
 
-  LIN: {
-    stakes:
-      "Linde's industrial-gas plants and engineering projects tied capital to customer processes for years, but energy inputs, mega-project execution, and industrial demand determined the value of those durable contracts.",
-    moments: [
-      {
-        year: 2000,
-        then: "Germany's Linde supplies industrial gases and builds process plants while also owning materials-handling and refrigeration operations; its identity is broader than gases alone.",
-        after: "Linde had developed gas-separation technology and assembled engineering, refrigeration, and forklift businesses over decades.",
-      },
-      {
-        year: 2007,
-        then: "The BOC acquisition has made Linde a much larger global gases supplier, and the sale of the KION forklift business has left industrial gases and engineering at the core.",
-        after: "Linde had acquired British industrial-gas group BOC in 2006 and sold its materials-handling operations.",
-      },
-      {
-        year: 2019,
-        then: "Linde has completed an all-stock combination with Praxair under a new Irish parent, and former Praxair chief Steve Angel is integrating overlapping networks under regulatory divestiture orders.",
-        after: "Linde AG and Praxair had closed their merger in October 2018 after agreeing to substantial asset sales.",
-      },
-      {
-        year: 2023,
-        then: "Long-term on-site gas contracts support the base business, while clean-hydrogen and carbon-capture projects create a new capital pipeline dependent on customer commitments and policy support.",
-        after: "Linde had announced multiple low-carbon hydrogen projects and proposed eliminating its Frankfurt listing in favor of a single New York listing.",
-      },
-    ],
-    recentArc:
-      "Through 2024, Linde signed additional long-term supply projects in electronics, chemicals, and low-carbon hydrogen, increased its U.S. market emphasis, and continued integrating engineering capabilities with on-site gas contracts.",
-  },
-
   LMT: {
     stakes:
       "Lockheed Martin's aircraft, missiles, satellites, and classified systems offered long backlogs, but program performance, procurement politics, security obligations, and dependence on government budgets shaped every franchise.",
     moments: [
       {
         year: 2000,
-        then: "The Lockheed and Martin Marietta combination spans F-16 fighters, missiles, military electronics, launch vehicles, and information systems, while failed acquisitions have left management focused on execution.",
+        then: "The Lockheed and Martin Marietta combination spans F-16 fighters, missiles, military electronics, launch vehicles, and information systems, while a blocked Northrop Grumman combination has left management focused on execution.",
         after: "Lockheed Martin had formed in 1995, acquired Loral defense assets, and abandoned a proposed Northrop Grumman purchase under antitrust pressure.",
       },
       {
@@ -1021,8 +992,8 @@ export const CONSUMER_INDUSTRIAL_STORIES: Record<
       },
       {
         year: 2023,
-        then: "Mike Roman plans to spin off health care, while PFAS contamination claims and Combat Arms earplug litigation create liabilities too large to treat as ordinary product issues.",
-        after: "3M had announced the Solventum health-care separation, placed its earplug subsidiary into bankruptcy, and committed to ending PFAS manufacturing.",
+        then: "Mike Roman plans to spin off health care, while PFAS contamination claims and Combat Arms earplug litigation—already the subject of an Aearo Technologies bankruptcy filing—create liabilities too large to treat as ordinary product issues.",
+        after: "3M announced the Solventum health-care separation, committed to ending PFAS manufacturing, and advanced major settlements covering public-water PFAS claims and military earplugs after the 2022 Aearo bankruptcy filing.",
       },
     ],
     recentArc:
@@ -1045,7 +1016,7 @@ export const CONSUMER_INDUSTRIAL_STORIES: Record<
       },
       {
         year: 2019,
-        then: "Kathy Warden is integrating Orbital ATK's rockets and satellites, while the B-21 Raider and Ground Based Strategic Deterrent competitions could define the next generation of strategic programs.",
+        then: "Kathy Warden is integrating Orbital ATK's rockets and satellites, while the B-21 Raider is in classified development and the Ground Based Strategic Deterrent competition could define the next land-based nuclear-missile program.",
         after: "Northrop Grumman had acquired Orbital ATK in 2018 and was developing the classified B-21 bomber.",
       },
       {

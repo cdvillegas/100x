@@ -26,6 +26,8 @@ const RESERVED = new Set([
 
 const NAME_PATTERN = /^[\p{L}\p{N} .'_-]{2,20}$/u;
 
+export const GUEST_NAME = "Anonymous";
+
 export type NameValidation =
   | { ok: true; name: string }
   | { ok: false; error: string };
@@ -76,4 +78,21 @@ export function validateDisplayName(input: unknown): NameValidation {
   }
 
   return { ok: true, name };
+}
+
+export function isGuestName(name: string | null | undefined) {
+  return !name || name.trim().toLowerCase() === GUEST_NAME.toLowerCase();
+}
+
+export function nameForSubmit(input: unknown) {
+  if (input == null || (typeof input === "string" && !input.trim())) {
+    return GUEST_NAME;
+  }
+  const result = validateDisplayName(input);
+  if (!result.ok) {
+    const error = new Error(result.error);
+    error.name = "NameValidationError";
+    throw error;
+  }
+  return result.name;
 }

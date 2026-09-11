@@ -1,5 +1,5 @@
 import { BANDS } from "../types";
-import type { PublicBoard, PublicCandidate } from "../types";
+import type { EraNote, PublicBoard, PublicCandidate } from "../types";
 import { ENTRY_DATES, resolveFirm, type RawRow } from "./fixtures";
 import {
   AS_OF_DATE,
@@ -25,7 +25,7 @@ export interface FullBoard {
   rankStart: number;
   rankEnd: number;
   bandLabel: string;
-  climate: { kicker: string; body: string };
+  climate: EraNote;
   candidates: FullCandidate[];
   boardAverage: number;
 }

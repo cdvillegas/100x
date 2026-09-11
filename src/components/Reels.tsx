@@ -109,7 +109,7 @@ function Reel({
   return (
     <div className="flex flex-col items-center gap-2">
       <div
-        className={`text-[11px] font-semibold tracking-[0.22em] ${tone === "year" ? "text-lime" : "text-amber"}`}
+        className={`eyebrow ${tone === "year" ? "text-lime" : "text-amber"}`}
       >
         {label}
       </div>

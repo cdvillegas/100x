@@ -10,28 +10,28 @@ export const FINANCE_MEDIA_STORIES: Record<string, CompanyStoryProfile> = {
         then:
           "Sandy Weill and John Reed are still trying to make the 1998 Citicorp–Travelers combination work. Salomon Smith Barney, Primerica, credit cards, and global branch banking sit under one roof while the Depression-era barriers behind Glass-Steagall have just been repealed.",
         after:
-          "Citigroup entered 2000 as the product of the Citicorp–Travelers merger, with Sandy Weill and John Reed leading a banking, brokerage, insurance, and consumer-finance conglomerate.",
+          "Citigroup paid large research-conflict settlements, made Sandy Weill sole chief executive after John Reed departed, and remained a sprawling financial supermarket.",
       },
       {
         year: 2003,
         then:
           "Sandy Weill still leads Citigroup as investigations into Wall Street research and Enron-era dealings test the financial supermarket. Travelers Property Casualty has already been spun off, weakening the original insurance logic of the combination.",
         after:
-          "Citigroup had spun off Travelers Property Casualty and faced scrutiny over research conflicts and structured-finance dealings while Sandy Weill remained chief executive.",
+          "Chuck Prince succeeded Weill and kept expanding, including in structured credit, until subprime losses forced a government rescue and years of shrinkage.",
       },
       {
         year: 2008,
         then:
           "Vikram Pandit has inherited a bank wounded by subprime mortgage securities and the collapse of structured investment vehicles. Chuck Prince has resigned, large write-downs have begun, and the board is scrambling to shrink an institution built for expansion.",
         after:
-          "Vikram Pandit took over after subprime losses and off-balance-sheet exposures forced Chuck Prince out in 2007.",
+          "Two federal rescues, asset guarantees, and a huge issuance of stock to the government kept Citigroup operating through the crisis.",
       },
       {
         year: 2009,
         then:
           "The U.S. government has injected capital, guaranteed a pool of troubled assets, and received warrants after two rescues. Citigroup has placed unwanted businesses into Citi Holdings while core banking operations remain in Citicorp.",
         after:
-          "Citigroup received extraordinary federal support in 2008 and separated noncore assets into Citi Holdings in early 2009.",
+          "Citigroup repaid rescue funds over subsequent years, shrank Citi Holdings, and spent a decade simplifying under Michael Corbat.",
       },
       {
         year: 2013,
@@ -60,7 +60,7 @@ export const FINANCE_MEDIA_STORIES: Record<string, CompanyStoryProfile> = {
         then:
           "Maurice “Hank” Greenberg runs a global insurance empire known for disciplined underwriting and aggressive expansion. AIG Financial Products sells complex derivatives alongside the property-casualty and life businesses.",
         after:
-          "Hank Greenberg led AIG’s global insurance operations while AIG Financial Products expanded its derivatives activities.",
+          "Hank Greenberg remained identified with AIG’s underwriting culture while AIG Financial Products continued expanding derivatives far outside ordinary insurance.",
       },
       {
         year: 2003,
@@ -74,12 +74,12 @@ export const FINANCE_MEDIA_STORIES: Record<string, CompanyStoryProfile> = {
         then:
           "Martin Sullivan leads an insurer already reporting damage from guarantees written on mortgage-linked securities. Credit-default swaps at AIG Financial Products threaten to connect falling collateral values with demands for more cash.",
         after:
-          "AIG entered 2008 under Martin Sullivan with mounting losses and collateral exposure tied to mortgage-related credit-default swaps.",
+          "In September 2008 the Federal Reserve and Treasury rescued AIG, and the company spent years selling assets—including AIA—to repay the government.",
       },
       {
         year: 2009,
         then:
-          "AIG is operating under federal control after an emergency rescue prevented collapse. Edward Liddy is selling assets to repay the government while the company absorbs public anger over counterparties and compensation.",
+          "AIG is operating under federal control after an emergency rescue prevented collapse. Edward Liddy is selling assets to repay the government while the scale of the aid and payments to counterparties dominate public debate.",
         after:
           "The Federal Reserve and Treasury rescued AIG in September 2008, and Edward Liddy began asset sales under government oversight.",
       },
@@ -122,7 +122,7 @@ export const FINANCE_MEDIA_STORIES: Record<string, CompanyStoryProfile> = {
       {
         year: 2009,
         then:
-          "The hastily arranged Countrywide and Merrill Lynch acquisitions have transformed the bank during a housing and market crisis. Government capital supports the balance sheet while mortgage liabilities and questions about Merrill’s losses dominate Ken Lewis’s final year.",
+          "The hastily arranged Countrywide and Merrill Lynch acquisitions have transformed the bank during a housing and market crisis. Government capital supports the balance sheet while mortgage liabilities and questions about Merrill’s losses dominate management’s agenda.",
         after:
           "Bank of America acquired Countrywide and Merrill Lynch in 2008 and received federal capital support as losses and integration pressures mounted.",
       },
@@ -293,7 +293,7 @@ export const FINANCE_MEDIA_STORIES: Record<string, CompanyStoryProfile> = {
       {
         year: 2020,
         then:
-          "Charlie Scharf is the fourth chief executive in several years, charged with rebuilding controls after the fake-accounts scandal and other customer-abuse findings. A Federal Reserve asset cap remains in place.",
+          "Charlie Scharf is the fourth chief executive in several years, charged with rebuilding controls after the fake-accounts scandal and other consumer-protection findings. A Federal Reserve asset cap remains in place.",
         after:
           "Charlie Scharf became chief executive in 2019 while Wells Fargo remained subject to the Federal Reserve’s asset cap imposed after governance failures.",
       },
@@ -358,7 +358,7 @@ export const FINANCE_MEDIA_STORIES: Record<string, CompanyStoryProfile> = {
       {
         year: 2000,
         then:
-          "Harvey Golub is handing leadership to Kenneth Chenault. American Express combines charge and credit cards, merchant acquiring, travel services, and financial advice in a closed-loop network built around premium customers.",
+          "Harvey Golub is preparing Kenneth Chenault as his successor. American Express combines charge and credit cards, merchant acquiring, travel services, and financial advice in a closed-loop network built around premium customers.",
         after:
           "Kenneth Chenault succeeded Harvey Golub as chief executive in 2001 after leading key card operations.",
       },
@@ -624,7 +624,7 @@ export const FINANCE_MEDIA_STORIES: Record<string, CompanyStoryProfile> = {
         then:
           "The firm has produced record results and remains heavily committed to commercial real estate, leveraged lending, and mortgage securities. Early stress in subprime lending has appeared, but management still presents diversification as a defense.",
         after:
-          "Lehman entered 2007 after record performance with substantial mortgage, commercial-real-estate, and leveraged-finance exposure.",
+          "Lehman produced record results, then closed BNC Mortgage in 2007 as subprime stress appeared, while retaining large real-estate exposures funded in wholesale markets.",
       },
       {
         year: 2008,
@@ -667,7 +667,7 @@ export const FINANCE_MEDIA_STORIES: Record<string, CompanyStoryProfile> = {
         then:
           "John Thain has replaced O’Neal after enormous mortgage write-downs. Merrill has raised capital and sold assets, but confidence in independent broker-dealers is fragile and the value of mortgage-linked holdings remains disputed.",
         after:
-          "John Thain took over in late 2007 after mortgage losses forced Stan O’Neal’s departure, and Merrill raised new capital.",
+          "Merrill raised capital and sold assets under John Thain, then agreed in September 2008 to be acquired by Bank of America.",
       },
     ],
     recentArc:
@@ -995,7 +995,7 @@ export const FINANCE_MEDIA_STORIES: Record<string, CompanyStoryProfile> = {
       {
         year: 2023,
         then:
-          "AT&T is again centered on connectivity after completing the WarnerMedia separation. Fiber expansion, mid-band wireless deployment, debt reduction, and the cost of legacy lead-sheathed cables frame the operating agenda.",
+          "AT&T is again centered on connectivity after completing the WarnerMedia separation. Fiber expansion, mid-band wireless deployment, and debt reduction frame the operating agenda.",
         after:
           "AT&T completed the WarnerMedia spinoff and Discovery combination in 2022 and returned its focus to wireless and fiber networks.",
       },
@@ -1060,7 +1060,7 @@ export const FINANCE_MEDIA_STORIES: Record<string, CompanyStoryProfile> = {
       {
         year: 2000,
         then:
-          "Michael Eisner oversees theme parks, ABC and ESPN, animation, consumer products, and a film studio still associated with the Disney renaissance. The costly Go.com internet strategy and strained relationship with former studio partner Jeffrey Katzenberg shadow the empire.",
+          "Michael Eisner oversees theme parks, ABC and ESPN, animation, consumer products, and a film studio still associated with the Disney renaissance. The costly Go.com internet strategy and questions about creative succession shadow the empire.",
         after:
           "Disney entered 2000 under Michael Eisner with ABC, ESPN, parks, animation, and film operations, while its Go.com internet initiative struggled.",
       },
@@ -1101,7 +1101,7 @@ export const FINANCE_MEDIA_STORIES: Record<string, CompanyStoryProfile> = {
       },
     ],
     recentArc:
-      "In 2023 and 2024, Iger reorganized Disney into entertainment, ESPN, and experiences segments, cut costs, gained full control of Hulu, and prevailed in a proxy contest with Nelson Peltz. Disney+ and Hulu moved toward deeper integration while ESPN prepared a direct-to-consumer service.",
+      "In 2023 and 2024, Iger reorganized Disney into entertainment, ESPN, and experiences segments, cut costs, began buying out Comcast’s remaining Hulu stake, and prevailed in a proxy contest with Nelson Peltz. Disney+ and Hulu moved toward deeper integration while ESPN prepared a direct-to-consumer service.",
   },
   AMT: {
     stakes:
@@ -1138,9 +1138,9 @@ export const FINANCE_MEDIA_STORIES: Record<string, CompanyStoryProfile> = {
       {
         year: 2020,
         then:
-          "Tom Bartlett is preparing to succeed Taiclet as carriers deploy fifth-generation equipment. Long leases support predictable revenue, but mergers among major wireless tenants and overseas currency movements complicate the outlook.",
+          "Jim Taiclet remains chief executive as carriers deploy fifth-generation equipment. Long leases support predictable revenue, but mergers among major wireless tenants and overseas currency movements complicate the outlook.",
         after:
-          "American Tower named Tom Bartlett to succeed Jim Taiclet in 2020 as fifth-generation network deployments accelerated.",
+          "American Tower named Tom Bartlett to succeed Jim Taiclet later in 2020 as fifth-generation network deployments accelerated.",
       },
       {
         year: 2023,
@@ -1296,7 +1296,7 @@ export const FINANCE_MEDIA_STORIES: Record<string, CompanyStoryProfile> = {
       {
         year: 2007,
         then:
-          "Eric Schmidt leads Google alongside founders Larry Page and Sergey Brin. Search advertising powers rapid expansion into Gmail, Maps, YouTube, and the newly acquired Android platform.",
+          "Eric Schmidt leads Google alongside founders Larry Page and Sergey Brin. Search advertising powers rapid expansion into Gmail, Maps, YouTube, and the Android software platform acquired in 2005.",
         after:
           "By 2007, Google had acquired YouTube and Android under Eric Schmidt.",
       },

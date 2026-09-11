@@ -93,6 +93,7 @@ function lockedPicks(session: SessionRecord): LockedPick[] {
       ticker: candidate.ticker,
       year: board.year,
       bandLabel: board.bandLabel,
+      marketCapRank: candidate.marketCapRank,
     };
   });
 }
@@ -244,6 +245,7 @@ export function reveal(session: SessionRecord): RevealPayload {
       ticker: bestCandidate.ticker,
       year: board.year,
       bandLabel: board.bandLabel,
+      marketCapRank: bestCandidate.marketCapRank,
       entryBankroll: PICK_STAKE,
       todayValue: positionToday(bestCandidate.forwardTotalReturn),
       forwardTotalReturn: bestCandidate.forwardTotalReturn,
@@ -256,6 +258,7 @@ export function reveal(session: SessionRecord): RevealPayload {
       ticker: candidate.ticker,
       year: board.year,
       bandLabel: board.bandLabel,
+      marketCapRank: candidate.marketCapRank,
       entryBankroll: PICK_STAKE,
       todayValue,
       exitBankroll: bankroll,

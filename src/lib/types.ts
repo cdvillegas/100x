@@ -68,9 +68,25 @@ export interface PublicCandidate {
   trailingReturn: number | null;
 }
 
+export type EraMood =
+  | "recession"
+  | "bull"
+  | "mixed"
+  | "recovery"
+  | "crisis"
+  | "inflation"
+  | "easy-money"
+  | "late-cycle"
+  | "war-risk"
+  | "tech-wave"
+  | "oil-shock"
+  | "trade-war"
+  | "tightening";
+
 export interface EraNote {
   kicker: string;
   body: string;
+  chips: EraMood[];
 }
 
 export interface PublicBoard {
@@ -94,6 +110,7 @@ export interface LockedPick {
   ticker: string;
   year: number;
   bandLabel: string;
+  marketCapRank: number;
 }
 
 export interface RevealedPick extends LockedPick {
@@ -167,5 +184,7 @@ export interface LeaderboardBoard {
 
 export interface LeaderboardSubmitResult {
   displayName: string;
+  personalBest: boolean;
   placements: LeaderboardPlacement[];
+  boards: Record<LeaderboardPeriod, LeaderboardBoard>;
 }

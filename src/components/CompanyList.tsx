@@ -1,7 +1,8 @@
 "use client";
 
-import { formatCompact, formatPct } from "@/lib/format";
+import { formatCompact, formatPct, formatSharePrice, modeledSharePrice } from "@/lib/format";
 import type { PublicCandidate } from "@/lib/types";
+import { InfoIcon } from "./icons";
 
 function Stat({
   label,
@@ -14,16 +15,10 @@ function Stat({
 }) {
   return (
     <div className="text-right">
-      <div className={`tabular font-semibold ${compact ? "text-xs" : "text-sm"}`}>
+      <div className={`stat-value ${compact ? "compact" : ""}`}>
         {value}
       </div>
-      <div
-        className={`tracking-[0.1em] text-muted ${
-          compact ? "text-[8px]" : "text-[10px]"
-        }`}
-      >
-        {label}
-      </div>
+      <div className="stat-label">{label}</div>
     </div>
   );
 }
@@ -46,7 +41,7 @@ export default function CompanyList({
   return (
     <div>
       <div
-        className="flex flex-col gap-1.5 pb-24 lg:gap-2 lg:pb-4"
+        className="flex flex-col gap-2 pb-36 lg:pb-32"
         role="listbox"
         aria-label="Companies"
       >
@@ -56,7 +51,7 @@ export default function CompanyList({
             role="option"
             aria-selected={selectedId === company.id}
             tabIndex={0}
-            className="company-row w-full cursor-pointer rounded-xl px-3 py-2.5 text-left sm:rounded-2xl sm:py-3"
+            className="company-row w-full cursor-pointer rounded-2xl px-4 py-3.5 text-left sm:px-5 sm:py-4"
             onClick={() => onSelect(company.id)}
             onKeyDown={(event) => {
               if (event.key === "Enter" || event.key === " ") {
@@ -65,24 +60,25 @@ export default function CompanyList({
               }
             }}
           >
-            <div className="flex items-center gap-2.5">
-              <div className="mono-tile flex size-10 shrink-0 items-center justify-center rounded-lg bg-[#0d1c16] text-[15px] text-lime sm:size-11 sm:rounded-xl sm:text-base">
-                {company.ticker.slice(0, 2)}
-              </div>
+            <div className="flex items-center gap-4">
               <div className="min-w-0 flex-1">
-                <div className="truncate text-[15px] font-semibold">
-                  {company.name}
-                </div>
-                <div className="text-xs text-muted">
+                <div className="row-name truncate">{company.name}</div>
+                <div className="row-meta mt-0.5 text-muted">
                   <span className="text-lime">{company.ticker}</span>
                   {" · "}#{company.marketCapRank}
                 </div>
               </div>
-              <div className="flex shrink-0 gap-3 sm:hidden">
+              <div className="flex shrink-0 gap-4 sm:hidden">
                 <Stat
                   compact
-                  label="MCAP"
-                  value={formatCompact(company.marketCap)}
+                  label="PRICE"
+                  value={formatSharePrice(
+                    modeledSharePrice(
+                      company.ticker,
+                      company.year,
+                      company.marketCapRank,
+                    ),
+                  )}
                 />
                 <Stat
                   compact
@@ -90,22 +86,31 @@ export default function CompanyList({
                   value={formatPct(company.trailingReturn, 0)}
                 />
               </div>
-              <div className="hidden gap-4 sm:flex">
+              <div className="hidden gap-5 sm:flex">
+                <Stat
+                  label="PRICE"
+                  value={formatSharePrice(
+                    modeledSharePrice(
+                      company.ticker,
+                      company.year,
+                      company.marketCapRank,
+                    ),
+                  )}
+                />
                 <Stat label="MCAP" value={formatCompact(company.marketCap)} />
-                <Stat label="REV" value={formatCompact(company.revenue)} />
                 <Stat label="YOY" value={formatPct(company.revenueGrowth, 0)} />
                 <Stat label="PRIOR" value={formatPct(company.trailingReturn, 0)} />
               </div>
               <button
                 type="button"
-                className="ml-0.5 flex size-9 shrink-0 items-center justify-center rounded-full border border-white/10 text-sm text-muted sm:ml-1"
+                className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-white/12 bg-bg text-muted hover:text-lime"
                 aria-label={`Details for ${company.name}`}
                 onClick={(event) => {
                   event.stopPropagation();
                   onDetails(company.id);
                 }}
               >
-                i
+                <InfoIcon className="size-5" />
               </button>
             </div>
           </div>

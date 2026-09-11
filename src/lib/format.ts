@@ -1,5 +1,5 @@
 import type { OutcomeTier } from "./types";
-import { TARGET_BANKROLL } from "./types";
+import { PICK_STAKE, TARGET_BANKROLL } from "./types";
 
 export function formatMoney(value: number): string {
   const abs = Math.abs(value);
@@ -45,6 +45,51 @@ export function formatHoldReturn(totalReturn: number): string {
   return formatMultiplier(multiple);
 }
 
+export function modeledSharePrice(
+  ticker: string,
+  year: number,
+  marketCapRank: number,
+) {
+  let hash = 2166136261;
+  const key = `${ticker.toUpperCase()}:${year}`;
+  for (let i = 0; i < key.length; i++) {
+    hash ^= key.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  const jitter = 10 + (hash % 80);
+  const sizeBias = Math.max(6, 90 - marketCapRank);
+  return Math.max(8, Math.round(((jitter + sizeBias) / 2) * 100) / 100);
+}
+
+export function modeledShareCount(
+  ticker: string,
+  year: number,
+  marketCapRank: number,
+) {
+  return Math.max(
+    1,
+    Math.round(PICK_STAKE / modeledSharePrice(ticker, year, marketCapRank)),
+  );
+}
+
+export function formatSharePrice(value: number) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value);
+}
+
+export function buySharesLabel(
+  ticker: string,
+  year: number,
+  marketCapRank: number,
+) {
+  const count = modeledShareCount(ticker, year, marketCapRank);
+  return `BUY ${count.toLocaleString()} SHARES OF ${ticker}`;
+}
+
 export function formatPe(value: number | null): string {
   if (value == null) return "N/M";
   return value.toFixed(1);
@@ -58,25 +103,6 @@ export function outcomeTier(multiplier: number): OutcomeTier {
   if (multiplier >= 2) return "twoX";
   if (multiplier >= 1) return "green";
   return "lost";
-}
-
-export function tierLabel(tier: OutcomeTier): string {
-  switch (tier) {
-    case "hundredX":
-      return "100X";
-    case "fiftyX":
-      return "50X Club";
-    case "twentyFiveX":
-      return "25X Club";
-    case "tenX":
-      return "10X";
-    case "twoX":
-      return "2X Club";
-    case "green":
-      return "In the Green";
-    case "lost":
-      return "Lost Money";
-  }
 }
 
 export function bandCopy(rankStart: number, rankEnd: number): string {

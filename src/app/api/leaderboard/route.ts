@@ -36,7 +36,7 @@ export async function GET(request: Request) {
     const period = periodFrom(url.searchParams.get("period"));
     const gameId = url.searchParams.get("gameId") ?? undefined;
     const playerId = await getOrCreatePlayerId();
-    const boards = await loadBoards(playerId, gameId);
+    const { boards } = await loadBoards(playerId, gameId);
     const payload = {
       board: sanitizeLeaderboardPayload(boards[period]),
       placements: placementsFromBoards(boards),
@@ -62,10 +62,11 @@ export async function POST(request: Request) {
     }
     const playerId = await getOrCreatePlayerId();
     const entry = await submitRun(body.gameId, playerId, body.displayName);
-    const boards = await loadBoards(playerId, body.gameId);
+    const { boards, personalBest } = await loadBoards(playerId, body.gameId);
     const payload = {
       entry: toPublicEntry(entry),
       displayName: entry.displayName,
+      personalBest,
       placements: placementsFromBoards(boards),
       boards: {
         daily: sanitizeLeaderboardPayload(boards.daily),

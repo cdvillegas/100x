@@ -71,11 +71,35 @@ export function inPeriod(
   return completedAt >= start && completedAt < end;
 }
 
+function byScoreThenTime(a: LeaderboardEntry, b: LeaderboardEntry) {
+  if (b.bankroll !== a.bankroll) return b.bankroll - a.bankroll;
+  return a.completedAt.getTime() - b.completedAt.getTime();
+}
+
+export function bestPerPlayer(entries: LeaderboardEntry[]) {
+  const best = new Map<string, LeaderboardEntry>();
+  for (const entry of entries) {
+    const current = best.get(entry.playerId);
+    if (!current || byScoreThenTime(entry, current) < 0) {
+      best.set(entry.playerId, entry);
+    }
+  }
+  return [...best.values()];
+}
+
+export function isPersonalBest(
+  entries: LeaderboardEntry[],
+  playerId: string,
+  gameId: string,
+) {
+  const mine = entries.filter((entry) => entry.playerId === playerId);
+  if (mine.length === 0) return false;
+  const [best] = bestPerPlayer(mine);
+  return best?.gameId === gameId;
+}
+
 export function assignRanks(entries: LeaderboardEntry[]) {
-  const ordered = [...entries].sort((a, b) => {
-    if (b.bankroll !== a.bankroll) return b.bankroll - a.bankroll;
-    return a.completedAt.getTime() - b.completedAt.getTime();
-  });
+  const ordered = [...entries].sort(byScoreThenTime);
 
   const ranks = new Map<string, number>();
   let lastScore: number | null = null;
@@ -111,16 +135,18 @@ export function buildBoard(
   playerId: string | null,
   gameId?: string,
 ): LeaderboardBoard {
-  const scoped = entries.filter((entry) => inPeriod(entry.completedAt, period));
+  const scoped = bestPerPlayer(
+    entries.filter((entry) => inPeriod(entry.completedAt, period)),
+  );
   const { ordered, ranks } = assignRanks(scoped);
   const rows = ordered
     .slice(0, LEADERBOARD_LIMIT)
     .map((entry) => publicRow(entry, ranks.get(entry.gameId) ?? 0, playerId));
 
-  const yours = gameId
-    ? ordered.find((entry) => entry.gameId === gameId)
-    : playerId
-      ? ordered.find((entry) => entry.playerId === playerId)
+  const yours = playerId
+    ? ordered.find((entry) => entry.playerId === playerId)
+    : gameId
+      ? ordered.find((entry) => entry.gameId === gameId)
       : undefined;
 
   const you = yours

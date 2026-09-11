@@ -291,6 +291,9 @@ const YEAR_OVERRIDES: Record<string, { name?: string; ticker?: string; descripti
     name: "Andersen Consulting",
     description: "Advises large organizations on technology and operations while running outsourced business systems under long client contracts.",
   },
+  "AIG:2023": {
+    description: "Sells commercial and personal property-casualty insurance worldwide after listing its life and retirement business as Corebridge Financial.",
+  },
   "AAPL:2000": {
     description: "Makes Macintosh computers and creative software, controlling both the hardware and operating system in a Windows-dominated market.",
   },
@@ -326,7 +329,7 @@ const YEAR_OVERRIDES: Record<string, { name?: string; ticker?: string; descripti
   "AOL:2007": {
     name: "Time Warner",
     ticker: "TWX",
-    description: "Owns cable systems, film and television studios, magazines, and the shrinking AOL internet business assembled in the troubled 2001 merger.",
+    description: "Owns cable systems, film and television studios, magazines, and the shrinking AOL internet business assembled in the 2001 merger whose promised combination of old and new media had already disappointed.",
   },
   "AVGO:2012": {
     name: "Avago Technologies",
@@ -432,7 +435,7 @@ const YEAR_OVERRIDES: Record<string, { name?: string; ticker?: string; descripti
   },
   "CVS:2007": {
     name: "CVS Caremark",
-    description: "Combines a national drugstore chain with a newly acquired pharmacy-benefits manager that administers prescription plans.",
+    description: "Combines a national drugstore chain with Caremark, a pharmacy-benefit manager whose merger had been agreed but not yet closed.",
   },
   "CVS:2008": {
     name: "CVS Caremark",

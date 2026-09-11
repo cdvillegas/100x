@@ -67,10 +67,8 @@ export function companyAfterStory(
   );
 
   if (later.length === 0) return profile.recentArc;
-  if (later.length === 1) {
-    return distinct([later[0], profile.recentArc]).join(" ");
-  }
-  return `${later[0]} ${later[later.length - 1]}`;
+  const pieces = later.length === 1 ? later : [later[0], later[later.length - 1]];
+  return distinct([...pieces, profile.recentArc]).join(" ");
 }
 
 export function companyStoryProfileCount(): number {

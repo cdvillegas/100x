@@ -6,15 +6,19 @@ import {
   formatMoney,
   formatMultiplier,
   signedClass,
-  tierLabel,
 } from "@/lib/format";
 import type {
   BestPossiblePick,
+  LeaderboardBoard,
   LeaderboardPlacement,
+  LeaderboardRow,
   RevealPayload,
   RevealedPick,
 } from "@/lib/types";
-import { STARTING_BANKROLL, TARGET_BANKROLL } from "@/lib/types";
+import { STARTING_BANKROLL } from "@/lib/types";
+import { shareResults } from "@/lib/share";
+import { DiceIcon, ShareIcon } from "./icons";
+import Confetti from "./Confetti";
 
 function CountUp({
   from = 0,
@@ -49,6 +53,22 @@ function CountUp({
   );
 }
 
+function PersonalBestLabel({ reducedMotion }: { reducedMotion: boolean }) {
+  if (reducedMotion) {
+    return <div className="eyebrow text-lime">PERSONAL BEST</div>;
+  }
+
+  return (
+    <div className="eyebrow personal-best" aria-label="Personal best">
+      {Array.from("PERSONAL BEST").map((letter, index) => (
+        <span key={`${letter}-${index}`} style={{ animationDelay: `${index * 38}ms` }}>
+          {letter === " " ? "\u00a0" : letter}
+        </span>
+      ))}
+    </div>
+  );
+}
+
 function RevealSlot({
   pick,
   slot,
@@ -60,94 +80,99 @@ function RevealSlot({
   active: boolean;
   reducedMotion: boolean;
 }) {
-  if (!pick) {
-    return (
-      <div className="flex h-28 items-center rounded-2xl border border-white/[0.07] bg-white/[0.015] px-4">
-        <span className="text-[10px] tracking-[0.2em] text-muted/40">
-          {String(slot + 1).padStart(2, "0")}
-        </span>
-      </div>
-    );
-  }
+  const tone = pick ? signedClass(pick.forwardTotalReturn) : "flat";
+  const valueClass =
+    tone === "up" ? "text-lime" : tone === "down" ? "text-coral" : "text-ink";
 
-  const tone = signedClass(pick.forwardTotalReturn);
   return (
     <div
-      className={`rise-in h-28 rounded-2xl border px-4 py-3 has-[details[open]]:h-auto ${
-        active
-          ? "border-lime/60 bg-[#163225] shadow-[0_0_32px_rgb(176_255_72_/_0.1)]"
-          : "border-white/10 bg-[#12211b]"
+      className={`rounded-2xl px-4 py-3.5 sm:px-5 sm:py-4 ${
+        pick ? "company-row rise-in" : "company-row"
       }`}
     >
-      <div className="flex min-h-14 items-center justify-between gap-4">
-        <div className="min-w-0">
-          <div className="text-[10px] tracking-[0.14em] text-muted">
-            {pick.year} · {pick.bandLabel} · #{pick.forwardRank} of 10
+      <div className="flex items-center gap-4">
+        <div className="min-w-0 flex-1">
+          <div className={`row-name truncate ${pick ? "" : "text-muted"}`}>
+            {pick ? pick.name : "Sealed"}
           </div>
-          <div className="mt-0.5 truncate text-lg font-semibold">{pick.name}</div>
-          <div className="text-xs text-muted">{pick.ticker} · $2,000</div>
-        </div>
-        <div className="shrink-0 text-right">
-          <div
-            className={`display text-2xl ${
-              tone === "up"
-                ? "text-lime"
-                : tone === "down"
-                  ? "text-coral"
-                  : "text-ink"
-            }`}
-          >
-            {active ? (
-              <CountUp
-                key={pick.candidateId}
-                value={pick.todayValue}
-                reducedMotion={reducedMotion}
-              />
+          <div className="row-meta mt-0.5 text-muted">
+            {pick ? (
+              <>
+                <span className="text-lime">{pick.ticker}</span>
+                {" · "}
+                {pick.year} · {pick.bandLabel}
+              </>
             ) : (
-              formatMoney(pick.todayValue)
+              "Held until today"
             )}
           </div>
-          <div className="text-xs text-muted">
-            {formatHoldReturn(pick.forwardTotalReturn)}
+        </div>
+        <div className="shrink-0 text-right">
+          <div className={`display text-3xl ${pick ? valueClass : "text-muted/40"}`}>
+            {pick ? (
+              active ? (
+                <CountUp
+                  key={pick.candidateId}
+                  value={pick.todayValue}
+                  reducedMotion={reducedMotion}
+                />
+              ) : (
+                formatMoney(pick.todayValue)
+              )
+            ) : (
+              "—"
+            )}
+          </div>
+          <div className="stat-label">
+            {pick ? formatHoldReturn(pick.forwardTotalReturn) : "—"}
           </div>
         </div>
       </div>
-      {pick.outcomeNotes ? (
+      {pick?.outcomeNotes ? (
         <details className="group mt-2 border-t border-white/[0.07] pt-2">
-          <summary className="cursor-pointer list-none text-[10px] tracking-[0.16em] text-muted transition-colors hover:text-ink">
+          <summary className="eyebrow cursor-pointer list-none text-muted transition-colors hover:text-ink">
             <span className="group-open:hidden">WHAT HAPPENED?</span>
             <span className="hidden group-open:inline">HIDE STORY</span>
           </summary>
           <p className="mt-2 text-sm leading-6 text-ink/85">{pick.outcomeNotes}</p>
         </details>
-      ) : null}
+      ) : (
+        <div
+          className="mt-2 border-t border-white/[0.07] pt-2 eyebrow text-muted/50"
+          aria-hidden={Boolean(pick)}
+        >
+          {pick ? "\u00a0" : "SEALED"}
+        </div>
+      )}
     </div>
   );
 }
 
 function BestPossibleRow({ pick }: { pick: BestPossiblePick }) {
   return (
-    <div className="flex items-center justify-between gap-4 border-b border-amber/15 py-3 last:border-0">
-      <div className="min-w-0">
-        <div className="display truncate text-lg" title={pick.name}>
-          {pick.name}
-        </div>
-        <div className="mt-0.5 flex min-w-0 flex-wrap items-center gap-2 text-xs text-muted">
-          <span>
-            {pick.ticker} · {pick.year} · {pick.bandLabel}
-          </span>
+    <div className="flex items-center gap-3 border-b border-white/10 py-3.5 last:border-0">
+      <div className="min-w-0 flex-1">
+        <div className="flex min-w-0 items-center gap-2">
+          <div className="row-name truncate">{pick.name}</div>
           {pick.wasSelected ? (
-            <span className="rounded-full border border-lime/30 bg-lime/10 px-2 py-0.5 text-[9px] tracking-[0.14em] text-lime">
-              YOU PICKED IT
+            <span className="shrink-0 rounded-full border border-lime/30 bg-lime/10 px-2 py-0.5 text-[10px] font-bold tracking-[0.14em] text-lime">
+              PICKED
             </span>
           ) : null}
         </div>
+        <div className="row-meta mt-0.5 text-muted">
+          <span className="text-lime">{pick.ticker}</span>
+          {" · "}
+          {pick.year} · {pick.bandLabel}
+        </div>
       </div>
       <div className="shrink-0 text-right">
-        <div className="display text-xl text-amber">
+        <div className="display text-2xl text-lime">
           {formatHoldReturn(pick.forwardTotalReturn)}
         </div>
-        <div className="text-xs text-muted">{formatMoney(pick.todayValue)}</div>
+        <div className="stat-label">
+          {formatMoney(pick.todayValue)}
+        </div>
       </div>
     </div>
   );
@@ -159,9 +184,37 @@ function periodLabel(period: LeaderboardPlacement["period"]) {
   return "All Time";
 }
 
+function MiniRow({ row }: { row: LeaderboardRow }) {
+  return (
+    <div
+      className={`flex items-center justify-between gap-4 border-b border-white/10 py-3.5 last:border-0 ${
+        row.isYou ? "text-lime" : ""
+      }`}
+    >
+      <div className="flex min-w-0 items-center gap-3">
+        <span
+          className={`display w-10 shrink-0 text-lg leading-none ${
+            row.isYou ? "" : "text-muted"
+          }`}
+        >
+          #{row.rank}
+        </span>
+        <span className="row-name truncate">{row.name}</span>
+      </div>
+      <div className="shrink-0 text-right">
+        <div className="display text-xl tracking-tight">
+          {formatMultiplier(row.multiplier)}
+        </div>
+        <div className="stat-label mt-0.5">{formatMoney(row.bankroll)}</div>
+      </div>
+    </div>
+  );
+}
+
 function PlacementCard({
   placements,
-  approvedName,
+  preview,
+  hasChosenName,
   draftName,
   submitting,
   error,
@@ -171,7 +224,8 @@ function PlacementCard({
   onOpenBoard,
 }: {
   placements: LeaderboardPlacement[];
-  approvedName: string | null;
+  preview: LeaderboardBoard | null;
+  hasChosenName: boolean;
   draftName: string;
   submitting: boolean;
   error: string | null;
@@ -180,82 +234,109 @@ function PlacementCard({
   onRetry: () => void;
   onOpenBoard: () => void;
 }) {
-  const highlight = placements.find((item) => item.first) ?? placements.find((item) => item.topTen);
+  const highlight =
+    placements.find((item) => item.first) ??
+    placements.find((item) => item.topTen) ??
+    placements[0] ??
+    preview?.placement ??
+    null;
+  const you = preview?.you;
+  const rank = you?.rank ?? highlight?.rank;
+  const rows = preview?.rows.slice(0, 8) ?? [];
 
   return (
-    <div className="mt-6 rounded-2xl border border-lime/35 bg-lime/[0.04] p-4">
-      <div className="text-[11px] tracking-[0.18em] text-lime">ON THE BOARD</div>
-      {placements.length > 0 ? (
-        <>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {placements.map((item) => (
-              <div
-                key={item.period}
-                className="rounded-full border border-white/10 px-3 py-1 text-sm"
-              >
-                #{item.rank} {periodLabel(item.period)}
-              </div>
-            ))}
+    <div className="company-row mt-6 rounded-2xl px-4 py-4 sm:px-5">
+      <div className="eyebrow text-muted">LEADERBOARD</div>
+      {rank ? (
+        <div className="mt-4 grid grid-cols-2 items-start">
+          <div>
+            <div className="eyebrow text-muted">RANK</div>
+            <div className="display mt-1 text-4xl text-lime">
+              #{rank}
+            </div>
           </div>
-          <p className="mt-3 text-sm text-muted">
-            {highlight?.first
-              ? `You lead the ${periodLabel(highlight.period)} board.`
-              : highlight?.topTen
-                ? `You made the ${periodLabel(highlight.period)} top 10.`
-                : "Your run is posted. Picks stay sealed."}
-          </p>
-          <button
-            type="button"
-            className="mt-3 text-xs tracking-[0.14em] text-lime"
-            onClick={onOpenBoard}
-          >
-            VIEW LEADERBOARD
-          </button>
-        </>
-      ) : approvedName ? (
-        <div className="mt-3">
-          <p className="text-sm text-muted">
-            {error ?? "Posting your run to the board…"}
-          </p>
-          {error ? (
-            <button
-              type="button"
-              className="mt-3 text-xs tracking-[0.14em] text-lime"
-              onClick={onRetry}
-            >
-              TRY AGAIN
-            </button>
-          ) : null}
+          <div className="text-right">
+            <div className="eyebrow text-muted">
+              {highlight ? periodLabel(highlight.period).toUpperCase() : "DAILY"}
+            </div>
+            <div className="display mt-1 text-3xl tabular">
+              {highlight ? highlight.total : "—"}
+            </div>
+            <div className="stat-label mt-1">runs</div>
+          </div>
         </div>
       ) : (
+        <p className="mt-3 text-sm text-muted">
+          {submitting ? "Saving…" : (error ?? "Loading…")}
+        </p>
+      )}
+
+      {placements.length > 1 ? (
+        <p className="mt-3 text-xs text-muted">
+          {placements
+            .map((item) => `#${item.rank} ${periodLabel(item.period)}`)
+            .join(" · ")}
+        </p>
+      ) : null}
+
+      {rows.length > 0 ? (
+        <div className="mt-4 border-t border-white/10">
+          {rows.map((row) => (
+            <MiniRow
+              key={`${row.rank}-${row.name}-${row.completedAt}`}
+              row={row}
+            />
+          ))}
+        </div>
+      ) : null}
+
+      {error && !rank ? (
+        <button
+          type="button"
+          className="eyebrow mt-3 text-lime"
+          onClick={onRetry}
+        >
+          RETRY
+        </button>
+      ) : null}
+
+      {!hasChosenName && rank ? (
         <form
-          className="mt-3 grid gap-2"
+          className="mt-5 border-t border-white/10 pt-5"
           onSubmit={(event) => {
             event.preventDefault();
             onSubmitName();
           }}
         >
-          <p className="text-sm text-muted">
-            Put your name on the board. Picks stay sealed.
-          </p>
-          <input
-            value={draftName}
-            onChange={(event) => onDraftName(event.target.value)}
-            maxLength={20}
-            autoComplete="nickname"
-            placeholder="Display name"
-            className="rounded-2xl border border-white/10 bg-[#07110d] px-4 py-3 text-ink outline-none"
-          />
-          {error ? <p className="text-sm text-coral">{error}</p> : null}
-          <button
-            type="submit"
-            disabled={submitting || draftName.trim().length < 2}
-            className="pressable rounded-2xl bg-lime py-3 text-sm font-bold tracking-[0.16em] text-[#10210f] disabled:opacity-40"
-          >
-            {submitting ? "POSTING" : "POST TO THE BOARD"}
-          </button>
+          <div className="eyebrow text-muted">NAME</div>
+          <div className="mt-2 flex gap-2">
+            <input
+              value={draftName}
+              onChange={(event) => onDraftName(event.target.value)}
+              maxLength={20}
+              autoComplete="nickname"
+              placeholder="Name"
+              className="min-w-0 flex-1 rounded-2xl border border-white/10 bg-bg px-4 py-3 text-ink outline-none"
+            />
+            <button
+              type="submit"
+              disabled={submitting || draftName.trim().length < 2}
+              className="pressable shrink-0 rounded-2xl border border-white/10 px-4 py-3 text-xs font-bold tracking-[0.14em] text-ink disabled:opacity-40"
+            >
+              {submitting ? "SAVING" : "SAVE"}
+            </button>
+          </div>
+          {error ? <p className="mt-2 text-sm text-coral">{error}</p> : null}
         </form>
-      )}
+      ) : null}
+
+      <button
+        type="button"
+        className="pressable btn-quiet mt-5 w-full rounded-2xl py-4 text-base"
+        onClick={onOpenBoard}
+      >
+        LEADERBOARD
+      </button>
     </div>
   );
 }
@@ -266,14 +347,15 @@ export default function Reveal({
   skipped,
   reducedMotion,
   placements,
-  approvedName,
+  preview,
+  personalBest,
+  hasChosenName,
   draftName,
   submitting,
   submitError,
   onAdvance,
   onSkip,
   onAgain,
-  onShare,
   onDraftName,
   onSubmitName,
   onRetry,
@@ -284,14 +366,15 @@ export default function Reveal({
   skipped: boolean;
   reducedMotion: boolean;
   placements: LeaderboardPlacement[];
-  approvedName: string | null;
+  preview: LeaderboardBoard | null;
+  personalBest: boolean;
+  hasChosenName: boolean;
   draftName: string;
   submitting: boolean;
   submitError: string | null;
   onAdvance: () => void;
   onSkip: () => void;
   onAgain: () => void;
-  onShare: () => void;
   onDraftName: (value: string) => void;
   onSubmitName: () => void;
   onRetry: () => void;
@@ -319,36 +402,49 @@ export default function Reveal({
   }, [done, index, reducedMotion, onAdvance]);
 
   return (
-    <div className="fixed inset-0 z-40 overflow-y-auto bg-[#07110d]/96 px-4 py-6">
-      <div className={`mx-auto min-h-full max-w-2xl ${done ? "pb-24" : ""}`}>
-        <div className="mb-4 flex items-center justify-between text-xs tracking-[0.16em] text-muted">
-          <span>YOUR RESULTS</span>
+    <div className="fixed inset-0 z-40 overflow-y-auto bg-bg/96 px-4 py-6">
+      <Confetti active={done && personalBest && !reducedMotion} />
+      <div className={`mx-auto min-h-full max-w-xl ${done ? "pb-28 sm:pb-24" : ""}`}>
+        <div className="relative mb-6 text-center">
+          <div className="display text-5xl tracking-tight">
+            100<span className="text-lime glow-text">X</span>
+          </div>
+          <p className="eyebrow mt-3 text-muted">RESULTS</p>
           <button
             type="button"
             onClick={onSkip}
             disabled={done}
             aria-hidden={done}
-            className={`text-ink ${done ? "invisible pointer-events-none" : ""}`}
+            className={`eyebrow absolute right-0 top-2 text-muted ${
+              done ? "invisible pointer-events-none" : ""
+            }`}
           >
-            Skip reveal
+            SKIP
           </button>
         </div>
 
-        <div className="mb-4 rounded-2xl border border-lime/20 bg-lime/[0.025] px-4 py-3 sm:px-5 sm:py-4">
-          <div className="text-[10px] tracking-[0.18em] text-muted">
-            {done ? "FINAL PORTFOLIO" : "PORTFOLIO VALUE"}
-          </div>
-          <div className="mt-1 flex items-end justify-between gap-4">
-            <div className="display text-4xl font-semibold sm:text-5xl">
-              <CountUp
-                key={`total-${index}-${done}`}
-                from={done ? payload.endingBankroll : previousTotal}
-                value={runningTotal}
-                reducedMotion={reducedMotion}
-              />
+        <div className="company-row mb-4 rounded-2xl px-4 py-4 sm:px-5">
+          <div className="grid grid-cols-2 items-start">
+            <div>
+              {done && personalBest ? (
+                <PersonalBestLabel reducedMotion={reducedMotion} />
+              ) : (
+                <div className="eyebrow text-muted">
+                  {done ? "BANKROLL" : "PORTFOLIO"}
+                </div>
+              )}
+              <div className="display mt-1 text-4xl">
+                <CountUp
+                  key={`total-${index}-${done}`}
+                  from={done ? payload.endingBankroll : previousTotal}
+                  value={runningTotal}
+                  reducedMotion={reducedMotion}
+                />
+              </div>
             </div>
             <div className="text-right">
-              <div className="display text-2xl text-lime sm:text-3xl">
+              <div className="eyebrow text-muted">RETURN</div>
+              <div className="display mt-1 text-4xl text-lime">
                 <CountUp
                   key={`multiplier-${index}-${done}`}
                   from={done ? payload.multiplier : previousMultiplier}
@@ -357,13 +453,7 @@ export default function Reveal({
                   formatter={formatMultiplier}
                 />
               </div>
-              {done ? (
-                <div className="text-xs text-muted">{tierLabel(payload.tier)}</div>
-              ) : null}
             </div>
-          </div>
-          <div className="mt-1 text-xs text-muted">
-            Target {formatMoney(TARGET_BANKROLL)}
           </div>
         </div>
 
@@ -383,7 +473,8 @@ export default function Reveal({
           <div className="rise-in">
             <PlacementCard
               placements={placements}
-              approvedName={approvedName}
+              preview={preview}
+              hasChosenName={hasChosenName}
               draftName={draftName}
               submitting={submitting}
               error={submitError}
@@ -392,31 +483,53 @@ export default function Reveal({
               onRetry={onRetry}
               onOpenBoard={onOpenBoard}
             />
-            <div className="mt-6 rounded-2xl border border-amber/45 bg-amber/[0.045] p-4">
-              <div className="text-[11px] tracking-[0.18em] text-amber">
-                BEST PORTFOLIO AVAILABLE
+            <div className="company-row mt-6 rounded-2xl px-4 py-4 sm:px-5">
+              <div
+                className={`eyebrow ${
+                  bestPickCount === 5 ? "text-lime" : "text-muted"
+                }`}
+              >
+                {bestPickCount === 5 ? "PERFECT BOARD" : "BEST AVAILABLE"}
               </div>
-              <p className="mt-1 text-xs leading-5 text-muted">
-                The best-performing company from each of your five boards.
-                You found {bestPickCount} of 5.
-              </p>
+              <p className="mt-1 text-sm text-muted">{bestPickCount} of 5</p>
               <div className="mt-2">
                 {payload.bestPossiblePicks.map((pick) => (
                   <BestPossibleRow key={pick.boardId} pick={pick} />
                 ))}
               </div>
-              <div className="mt-3 flex items-end justify-between gap-4 border-t border-amber/25 pt-3">
+              <div className="mt-4 grid grid-cols-2 items-start border-t border-white/10 pt-5">
                 <div>
-                  <div className="text-xs text-muted">Best possible total</div>
-                  <div className="display text-3xl text-amber">
+                  <div className="eyebrow text-muted">BEST TOTAL</div>
+                  <div
+                    className={`hero-money mt-1 ${
+                      bestPickCount === 5 ? "text-lime" : ""
+                    }`}
+                  >
                     {formatMoney(payload.oracleBankroll)}
                   </div>
                 </div>
-                <div className="text-right text-xs leading-5 text-muted">
-                  {formatMoney(
-                    Math.max(0, payload.oracleBankroll - payload.endingBankroll),
-                  )}{" "}
-                  more than your picks
+                <div className="text-right">
+                  <div
+                    className={`eyebrow ${
+                      bestPickCount === 5 ? "text-lime" : "text-amber"
+                    }`}
+                  >
+                    {bestPickCount === 5 ? "MATCHED" : "MISSED GAINS"}
+                  </div>
+                  <div
+                    className={`hero-money mt-1 ${
+                      bestPickCount === 5 ? "text-lime" : "text-amber"
+                    }`}
+                  >
+                    {bestPickCount === 5
+                      ? formatMoney(0)
+                      : formatMoney(
+                          Math.max(
+                            0,
+                            payload.oracleBankroll - payload.endingBankroll,
+                          ),
+                        )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -425,20 +538,24 @@ export default function Reveal({
       </div>
 
       {done ? (
-        <div className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-[#07110d]/92 backdrop-blur-md">
-          <div className="mx-auto flex max-w-2xl gap-3 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3">
+        <div className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-bg/92 backdrop-blur-md">
+          <div className="mx-auto flex max-w-xl gap-2 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 sm:gap-3">
             <button
               type="button"
-              className="pressable min-w-0 flex-1 rounded-2xl bg-lime py-3.5 text-sm font-bold tracking-[0.16em] text-[#10210f]"
+              className="pressable btn-quiet flex min-h-12 min-w-0 flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-2xl py-3 text-sm sm:min-h-14 sm:py-4 sm:text-base"
               onClick={onAgain}
             >
-              PLAY AGAIN
+              <DiceIcon />
+              SPIN AGAIN
             </button>
             <button
               type="button"
-              className="pressable shrink-0 rounded-2xl border border-white/15 px-6 py-3.5 text-sm font-semibold tracking-[0.12em]"
-              onClick={onShare}
+              className="pressable btn-lime share-pulse flex min-h-12 min-w-0 flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-2xl py-3 text-sm sm:min-h-14 sm:py-4 sm:text-base"
+              onClick={() => {
+                void shareResults(payload, window.location.origin);
+              }}
             >
+              <ShareIcon />
               SHARE
             </button>
           </div>

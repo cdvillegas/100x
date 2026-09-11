@@ -1,4 +1,4 @@
-import type { SectorKey } from "../types";
+import type { EraMood, SectorKey } from "../types";
 import {
   companyAfterStory,
   companyThenStory,
@@ -8,63 +8,76 @@ import { sectorOf } from "./sectors";
 export interface EraClimate {
   kicker: string;
   body: string;
+  chips: EraMood[];
 }
 
 /** What the world felt like at the start of the year. No prices, no future. */
 export const YEAR_CLIMATE: Record<number, EraClimate> = {
   2000: {
     kicker: "Prosperity feels programmable.",
-    body: "Y2K passed without disaster, the U.S. expansion is approaching the postwar record, and unemployment is near 4%. Internet spending and productivity inspire real optimism—even as oil has doubled and technology valuations assume years of flawless growth.",
+    body: "Y2K passed without disaster. The expansion that began in 1991 is matching the longest postwar run, unemployment is 4.1%, and the federal budget is in surplus. Nasdaq rose more than 80% in 1999; internet spending and measured productivity gains make growth feel like software you can ship. The Fed funds rate sits at 5.5%, oil has more than doubled from about $12 to the mid-$20s on OPEC cuts and recovering demand, and the 1999 repeal of Glass-Steagall is already remaking finance. Technology valuations assume years of flawless execution—even as money and energy have both gotten dearer.",
+    chips: ["bull", "tech-wave", "mixed"],
   },
   2003: {
     kicker: "Recovery without conviction.",
-    body: "The dot-com bust erased trillions, U.S. unemployment is 6%, and war with Iraq looks increasingly possible. The Fed has cut rates to 1.25%; cheap mortgages support housing while Europe and Japan remain weak.",
+    body: "The Nasdaq has fallen roughly three-quarters from its March 2000 peak, erasing trillions in paper wealth, and U.S. unemployment is 6% with factories still shedding jobs. The Fed has cut the funds rate to 1.25%, 30-year mortgages sit near multi-decade lows, and a housing-and-refinancing boom is carrying household spending. UN weapons inspectors are back in Iraq under Resolution 1441, U.S. and British forces are massing in the Gulf, and markets treat war as a live risk. Europe and Japan remain weak; Sarbanes-Oxley is the new rulebook after Enron and WorldCom.",
+    chips: ["recovery", "mixed", "war-risk"],
   },
   2007: {
     kicker: "Global growth, hidden leverage.",
-    body: "China is expanding near 11%, private-equity deals are booming, and oil trades around $60. U.S. home prices have already turned and subprime delinquencies are rising, but most investors still expect the damage to stay contained.",
+    body: "China grew at a double-digit pace last year, emerging-market demand is lifting commodities, and private-equity buyouts have just set records. The Fed has held the funds rate at 5.25% since June, unemployment is near 4.5%, and the goldilocks story still sells. U.S. house prices peaked in 2006, homebuilding is contracting, and subprime adjustable-rate delinquencies are rising; a handful of mortgage originators have already failed. Oil is around $60 after a volatile year. Most investors still expect housing losses to stay contained inside a strong global expansion.",
+    chips: ["bull", "late-cycle", "mixed"],
   },
   2008: {
     kicker: "The credit system is cracking.",
-    body: "The subprime shock has frozen parts of global funding markets, Northern Rock has suffered a bank run, and central banks are cutting rates. Oil is near $100 and recession risk is obvious; how far the losses will spread is not.",
+    body: "Since last summer the subprime shock has frozen large parts of wholesale funding: Bear Stearns has liquidated two hedge funds, BNP Paribas has halted redemptions on three investment funds, Northern Rock has suffered a bank run, and the Fed has cut the funds rate from 5.25% to 4.25% while opening emergency auction facilities. Oil is near $100, squeezing households just as home prices and mortgage credit deteriorate. Banks are writing down CDOs; the question is not whether growth slows, but how far losses travel through an opaque securitization chain.",
+    chips: ["recession", "crisis", "oil-shock"],
   },
   2009: {
     kicker: "After the system nearly broke.",
-    body: "Lehman is gone, major banks are state-supported, global trade is collapsing, and U.S. payrolls are shrinking by hundreds of thousands a month. The Fed is near zero and launching unconventional support; nobody knows whether it is enough.",
+    body: "Lehman is gone, Fannie Mae and Freddie Mac are in conservatorship, AIG is on federal life support, and TARP capital is in the largest banks. The Fed has cut the funds rate to 0–0.25% and begun buying agency mortgage securities. Oil has collapsed from above $140 last summer to under $50. U.S. payrolls have been falling by hundreds of thousands a month, unemployment has climbed toward 7%, and world trade and factory output are dropping at a pace last seen in living memory. A new administration takes office in weeks; nobody knows whether the backstops are enough.",
+    chips: ["recession", "crisis", "easy-money"],
   },
   2012: {
     kicker: "A fragile recovery goes mobile.",
-    body: "Europe's sovereign-debt crisis threatens the euro, while U.S. unemployment remains above 8% and rates sit near zero. Smartphones and tablets are becoming everyday computers; cloud software is growing, but is not yet the default.",
+    body: "Europe's sovereign-debt crisis is the global risk: a Greek debt writedown has been agreed in principle, Italian and Spanish bond yields remain elevated, and the ECB has offered banks three-year unlimited loans to keep credit from seizing. U.S. unemployment is still above 8%, the funds rate sits at 0–0.25%, and the Fed is twisting its balance sheet toward longer-term Treasuries, promising low rates at least through mid-2013. Housing is depressed but no longer in free fall. Smartphones and tablets are becoming everyday computers after the iPhone and iPad; cloud software is a serious alternative to owned servers, not yet the default. Sanctions on Iran keep Brent expensive.",
+    chips: ["recovery", "mixed", "tech-wave"],
   },
   2013: {
     kicker: "The worst fears are receding.",
-    body: "The euro has survived, the U.S. has just stepped back from the fiscal cliff, and the Fed is buying $85 billion of bonds each month. Growth is still subdued, but housing, autos, smartphones, and U.S. shale are gaining momentum.",
+    body: "Mario Draghi's pledge to do \"whatever it takes,\" and the ECB's bond-buying backstop, have pulled the euro back from the brink. In Washington, Congress has just passed a last-minute fiscal-cliff deal that preserves most tax cuts and delays automatic spending cuts. The Fed is buying $85 billion of Treasuries and mortgage bonds each month and has tied the first rate increase to unemployment staying above 6.5%. U.S. joblessness is still just under 8%, but housing, auto sales, smartphones, and shale oil and gas are gaining real momentum. Growth feels possible again, not assured.",
+    chips: ["recovery", "easy-money", "mixed"],
   },
   2016: {
     kicker: "Cheap oil, uneasy markets.",
-    body: "Oil is below $40, China's slowdown is pressuring exporters, and several major economies have near-zero or negative rates. Migration, Britain's EU debate, and a bitter U.S. election season are turning politics into an economic variable.",
+    body: "Oil is below $40—down more than 60% from mid-2014—as U.S. shale, OPEC's decision not to cut, and weaker emerging-market demand glut the market. China's 2015 stock crash and August currency move still hang over exporters. The Fed has just made its first hike in nine years; the ECB, Switzerland, Sweden, and Denmark already run negative policy rates. High-yield energy credit is stressed. A British referendum on EU membership is expected this year, Europe is absorbing a migration crisis after 2015's refugee surge and the Paris attacks, and a bitter U.S. primary season is underway. Cheap fuel helps consumers; politics is no longer a background variable.",
+    chips: ["mixed", "oil-shock", "easy-money"],
   },
   2019: {
     kicker: "A mature boom meets a trade war.",
-    body: "The U.S.–China tariff fight is slowing factories and investment, Brexit remains unresolved, and the Fed has just raised rates again. U.S. unemployment is below 4%, yet markets are questioning how much longer the expansion can run.",
+    body: "A partial federal government shutdown that began December 22 is still running, with hundreds of thousands of workers unpaid. The Fed raised the funds rate to 2.25–2.50% in December—its fourth hike of 2018—helping trigger a sharp fourth-quarter market selloff; unemployment is below 4%. U.S.–China tariffs already cover hundreds of billions of dollars of goods, slowing factories and capital spending. Theresa May has not secured a Brexit deal, and the March exit date is approaching. The expansion is nearly a decade old, and that itself has become the worry.",
+    chips: ["late-cycle", "trade-war", "mixed"],
   },
   2020: {
     kicker: "Calm markets, fragile supply chains.",
-    body: "A U.S.–China trade truce is near, unemployment is 3.5%, and global manufacturing appears to be stabilizing after a weak 2019. Chinese officials have reported an unexplained pneumonia cluster in Wuhan; its global significance is unknown.",
+    body: "The United States and China announced a Phase One trade truce in December; the signing is days away, while most existing tariffs remain. Unemployment is 3.5%, the Fed has cut three times in 2019 to 1.50–1.75% after a September repo-market scare, and manufacturing surveys look to be stabilizing. The expansion that began in 2009 is still intact. The House has impeached the president; a Senate trial is imminent. On December 31, Chinese authorities reported a pneumonia cluster of unknown cause in Wuhan. Its reach is a footnote, not a forecast.",
+    chips: ["late-cycle", "mixed"],
   },
   2022: {
     kicker: "The pandemic boom meets inflation.",
-    body: "Omicron is spreading, supply chains remain clogged, and U.S. inflation is near a four-decade high. The Fed is accelerating its exit from easy money, while Russia's military buildup near Ukraine threatens energy and food markets.",
+    body: "The Omicron variant is spreading faster than earlier waves, testing hospitals and disrupting travel just as the economy is trying to normalize. November consumer prices are up 6.8% from a year earlier, the highest since 1982; used cars, energy, food, and rents are all contributing, and ports and chip plants remain bottlenecks. The Fed is still at 0–0.25% but has doubled the pace of tapering bond purchases and signaled rate increases this year. Labor is scarce, wages are rising, and households still hold pandemic savings. Russian forces are massed on Ukraine's borders; European gas markets are already tight.",
+    chips: ["inflation", "tightening", "war-risk"],
   },
   2023: {
     kicker: "High rates meet a new technology.",
-    body: "The Fed has lifted rates above 4%, Europe is adapting to lost Russian gas, and China is abruptly reopening from zero-COVID. ChatGPT is five weeks old: striking enough to notice, too new to know whether it changes an industry.",
+    body: "After more than four percentage points of hikes in a single year, the Fed funds rate is 4.25–4.50%—a 15-year high—and the central bank is shrinking its balance sheet. Inflation has cooled from a 9% peak but remains far above target; markets are arguing over a soft landing versus recession. Europe got through the autumn without a full gas emergency after filling storage and replacing much Russian pipeline supply with LNG and conservation. China is dismantling zero-COVID weeks after nationwide protests. FTX's November collapse has punctured crypto. ChatGPT, released November 30, is five weeks old: striking enough that every board has heard of it, too new to know whether it changes an industry.",
+    chips: ["tightening", "tech-wave", "mixed"],
   },
 };
 
 const SECTOR_CONTEXT: Record<number, Record<SectorKey, string>> = {
   2000: {
-    technology: "Y2K upgrades and internet traffic have driven extraordinary demand for PCs, servers, chips, and networking gear. The real infrastructure boom now shares a market with business models valued mainly on clicks and possibility.",
+    technology: "Y2K upgrades and internet traffic have driven extraordinary demand for PCs, servers, chips, and networking gear. The real infrastructure boom now shares a market with business models valued mainly on clicks and possibility—and with companies that have yet to earn a profit.",
     financials: "A strong economy, active markets, and the 1999 repeal of Glass–Steagall encourage banks to combine lending, trading, and insurance. Credit looks benign, but consolidation is creating institutions whose risks are harder to see.",
     energy: "OPEC restraint and recovering world demand have lifted crude from roughly $12 to more than $25 in a year. Integrated oil companies again have pricing power after the late-1990s commodity slump.",
     healthCare: "Drug pipelines, biotechnology, and medical devices attract capital as genomics advances. Large pharmaceutical companies still pair patented blockbusters with unusually defensive cash flow.",
@@ -75,7 +88,7 @@ const SECTOR_CONTEXT: Record<number, Record<SectorKey, string>> = {
   },
   2003: {
     technology: "The equipment glut from the internet boom is still being absorbed, and corporate technology budgets are tight. Survivors with cash and recurring enterprise revenue look stronger than the vanished dot-coms.",
-    financials: "A steep yield curve and a refinancing wave support bank earnings as 30-year mortgage rates reach modern lows. Credit losses from the recession are easing, and housing is becoming the preferred growth engine.",
+    financials: "A steep yield curve and a refinancing wave support bank earnings as 30-year mortgage rates sit near multi-decade lows. Credit losses from the recession are easing, and housing is becoming the preferred growth engine.",
     energy: "War risk in Iraq and supply disruption in Venezuela keep crude volatile. China's oil demand is rising rapidly, beginning to alter assumptions built around slow growth in rich countries.",
     healthCare: "Large drugmakers remain profitable, but patent expirations and pricing scrutiny matter more after the equity bust. Biotechnology is rebuilding credibility around products rather than genome-era promises.",
     consumer: "Mortgage refinancing and rising home prices give households spending power despite a soft labor market. Discount stores are resilient; travel and discretionary demand remain sensitive to war anxiety.",
@@ -156,9 +169,9 @@ const SECTOR_CONTEXT: Record<number, Record<SectorKey, string>> = {
   2020: {
     technology: "Cloud, software subscriptions, digital ads, and data centers are established profit engines. Chip and hardware supply chains remain exposed to trade restrictions and Asian manufacturing concentration.",
     financials: "Three Fed cuts in 2019 have eased funding conditions, while banks enter the year well capitalized. Low rates squeeze margins, and leveraged corporate credit is a more visible worry than household mortgages.",
-    energy: "Abundant U.S. shale supply and modest global demand keep pressure on producers. Investors want debt reduction and free cash flow; few are positioned for an abrupt collapse in travel.",
+    energy: "Abundant U.S. shale supply and modest global demand keep pressure on producers. Investors want debt reduction and free cash flow rather than a return to aggressive volume growth.",
     healthCare: "Drug pricing dominates U.S. policy debate, and hospitals face ordinary cost pressure. An unexplained pneumonia cluster in Wuhan is being monitored, but no one can yet price its medical or economic reach.",
-    consumer: "Low unemployment and wage gains support stores, travel, restaurants, and housing. Online shopping and streaming are growing choices, not yet substitutes for physical life.",
+    consumer: "Low unemployment and wage gains support stores, travel, restaurants, and housing. Online shopping and streaming are growing alongside those physical businesses, not replacing them.",
     industrials: "Global manufacturing is emerging from a trade-war slowdown, but autos and capital goods remain weak. Aerospace, logistics, and factory supply chains depend on a gradual rebound in world trade.",
     communications: "Streaming competition is accelerating and 5G marketing is ahead of coverage. Digital platforms capture more advertising, while cable broadband remains the essential connection in most homes.",
     utilities: "Low rates support infrastructure spending and dividends. Wind, solar, and natural gas keep displacing coal, making grid modernization a larger part of the investment case.",
@@ -224,7 +237,7 @@ export const THEN: Record<string, string> = {
   "2023:MSFT":
     "OpenAI's new ChatGPT runs on Azure infrastructure, and Microsoft is already its major partner. Whether generative AI changes Office, Bing, or cloud demand is still an open question.",
   "2000:AMZN":
-    "An unprofitable bookstore-of-everything. The punchline writes itself. Bezos keeps talking about a flywheel nobody can see in the earnings.",
+    "An unprofitable bookstore-of-everything. Bezos keeps talking about a flywheel that is hard to see in the earnings.",
   "2007:AMZN":
     "Still 'the website that ships boxes.' AWS exists as a weird side business for developers, not a pillar of the S&P.",
   "2012:AMZN":
@@ -240,7 +253,7 @@ export const THEN: Record<string, string> = {
   "2008:GOOG":
     "The default way to ask the internet a question. Mobile search is the open fight. YouTube still looks like a toy that burns bandwidth.",
   "2012:GOOG":
-    "Mobile is eating desktop search. Android is the quiet empire. People are starting to say 'don't be evil' as a joke.",
+    "Mobile is eating desktop search. Android is the quiet empire. Privacy and scale are drawing more public criticism of a company that once defined itself by 'don't be evil.'",
   "2016:GOOG":
     "Now Alphabet on paper. YouTube and ads are the engine. Cars and moonshots are the science-fair.",
   "2020:GOOG":
@@ -294,7 +307,7 @@ export const THEN: Record<string, string> = {
   "2016:FB":
     "News Feed is how news happens. Instagram is the youth insurance policy. Video and ads are the machine.",
   "2020:FB":
-    "The default social graph. Stories and Instagram keep it young. A coming election will make 'the algorithm' a villain again.",
+    "The default social graph. Stories and Instagram keep it young. A coming election will put the News Feed and content rules back under public scrutiny.",
   "2022:META":
     "The company formerly known as Facebook just bet the name on a metaverse. Apple's privacy change hit the ads. Reels is the fight with TikTok.",
   "2012:NFLX":
@@ -340,7 +353,7 @@ export const AFTER: Record<string, string> = {
   "2023:MSFT":
     "You bought the OpenAI wrapper as it was becoming obvious. A few years of AI spend, not a generation.",
   "2000:AMZN":
-    "A punchline that became infrastructure. AWS, Prime, and a refusal to show profit for years. The hold is the whole joke.",
+    "A money-losing retailer that became infrastructure. AWS, Prime, and years of reinvestment rather than reported profit. The hold is the whole story.",
   "2007:AMZN":
     "Boxes plus a side project called AWS. The side project became a utility. Retail became a habit.",
   "2022:AMZN":
@@ -358,7 +371,7 @@ export const AFTER: Record<string, string> = {
   "2023:NVDA":
     "You bought weeks into the chatbot era. The rerating was violent and fast. Not a 2008-style wait.",
   "2012:TSLA":
-    "A science project with a sedan. Scaling, China, and a cult of personality turned it into a mass-market auto stock — with software multiples.",
+    "A science project with a sedan. Scaling, China, and an unusually personal public narrative around Elon Musk turned it into a mass-market auto stock — with software multiples.",
   "2022:TSLA":
     "You bought the dream at the high. Competition and rates did what skeptics always said. Holding from the peak hurt.",
   "2007:LEH":
@@ -374,7 +387,7 @@ export const AFTER: Record<string, string> = {
   "2000:YHOO":
     "The homepage lost to search. Alibaba was the buried treasure, then a messy unwind. Not the compounder the 1999 story promised.",
   "2000:AOL":
-    "Dial-up and a merger. Broadband killed the bill. The brand became a punchline, then a footnote.",
+    "Dial-up and a merger. Broadband eroded the subscription. The brand faded from a household name to a footnote.",
   "2000:GE":
     "The MBA's favorite conglomerate. Finance blew up, the industrial core was broken for parts. Size was not a moat.",
   "2008:XOM":
@@ -451,6 +464,7 @@ export function yearClimate(year: number): EraClimate {
     YEAR_CLIMATE[year] ?? {
       kicker: "A year in the American tape.",
       body: "The board models a group of large public companies using only context available near the entry date. The future is not printed on the card.",
+      chips: ["mixed"],
     }
   );
 }

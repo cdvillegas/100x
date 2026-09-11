@@ -1,17 +1,26 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { formatCompact, formatPct, formatPe } from "@/lib/format";
-import type { PublicCandidate } from "@/lib/types";
+import { formatCompact, formatMoney, formatPct, formatPe } from "@/lib/format";
+import { STARTING_BANKROLL, TARGET_BANKROLL, type PublicCandidate } from "@/lib/types";
+import { ClockIcon, GridIcon, RocketIcon } from "./icons";
 
-function Row({ label, value, hint }: { label: string; value: string; hint: string }) {
+function Row({
+  label,
+  value,
+  hint,
+}: {
+  label: string;
+  value: string;
+  hint: string;
+}) {
   return (
-    <div className="flex items-start justify-between gap-6 border-b border-white/10 py-2.5">
+    <div className="flex items-start justify-between gap-6 border-b border-white/10 py-3">
       <div>
-        <div className="text-sm text-muted">{label}</div>
-        <div className="text-xs text-muted/80">{hint}</div>
+        <div className="text-[15px] font-bold">{label}</div>
+        <div className="mt-0.5 text-sm text-muted">{hint}</div>
       </div>
-      <div className="tabular text-base font-semibold">{value}</div>
+      <div className="stat-value">{value}</div>
     </div>
   );
 }
@@ -24,11 +33,13 @@ function TutorialStep({
   children: ReactNode;
 }) {
   return (
-    <li className="flex gap-3">
-      <span className="display flex size-7 shrink-0 items-center justify-center rounded-full bg-lime text-sm font-bold text-[#10210f]">
+    <li className="flex gap-4">
+      <span className="display mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full border border-white/14 text-base leading-none text-muted">
         {number}
       </span>
-      <span className="pt-0.5 text-sm leading-6 text-ink/90">{children}</span>
+      <span className="text-xl font-normal leading-7 text-ink/80">
+        {children}
+      </span>
     </li>
   );
 }
@@ -50,7 +61,7 @@ export default function Sheets({
     <div
       className={`sheet-scrim fixed inset-0 z-50 flex justify-center ${
         isGuide
-          ? "items-start overflow-y-auto bg-[#07110d] px-4 py-4 sm:py-8"
+          ? "items-start overflow-y-auto bg-bg px-4 py-4 sm:py-8"
           : "items-end p-3 sm:items-center"
       }`}
     >
@@ -65,83 +76,103 @@ export default function Sheets({
       <div
         className={`relative z-10 w-full overflow-y-auto overscroll-contain border border-white/10 shadow-2xl ${
           isGuide
-            ? "my-auto max-w-2xl shrink-0 rounded-[32px] bg-[#0d1813] shadow-[0_0_80px_rgb(183_255_69/0.08)]"
-            : "max-h-[min(90dvh,40rem)] max-w-lg rounded-[28px] bg-[#101c17]"
+            ? "my-auto max-w-xl shrink-0 rounded-[32px] bg-surface"
+            : "max-h-[min(90dvh,40rem)] max-w-lg rounded-[28px] bg-surface"
         }`}
       >
         <div className={isGuide ? "p-6 sm:p-9" : "p-5"}>
         {isGuide && (
           <div>
             <div className="text-center">
-              <div className="display text-5xl font-semibold tracking-tight sm:text-6xl">
-                100<span className="text-lime">X</span>
+              <div className="display text-5xl tracking-tight">
+                100<span className="text-lime glow-text">X</span>
               </div>
-              <p className="mt-2 text-xs tracking-[0.24em] text-muted">
+              <p className="eyebrow mt-3 text-muted">
                 PICK FIVE STOCKS FROM THE PAST
               </p>
-              <div className="mt-7 text-[11px] tracking-[0.2em] text-lime">
-                YOUR BANKROLL
-              </div>
-              <div className="display mt-1 text-4xl">$10,000</div>
             </div>
-            <ol className="mt-7 space-y-3 rounded-2xl border border-white/10 bg-white/[0.025] p-4 sm:p-5">
+            <div className="mt-8 grid grid-cols-2 items-start border-y border-white/10 py-5">
+              <div>
+                <div className="eyebrow text-muted">BANKROLL</div>
+                <div className="hero-money mt-1">
+                  {formatMoney(STARTING_BANKROLL)}
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="eyebrow text-muted">TARGET</div>
+                <div className="hero-money mt-1 text-lime">
+                  {formatMoney(TARGET_BANKROLL)}
+                </div>
+              </div>
+            </div>
+            <ol className="mt-8 space-y-5">
               <TutorialStep number={1}>
-                <strong className="text-ink">Spin once</strong> to draw a year
-                and one market-cap band from the historical Top 100.
+                <strong className="font-semibold text-ink">Spin</strong> to land a year
+                and a market-cap rank from that year&apos;s top 100 stocks.
               </TutorialStep>
               <TutorialStep number={2}>
-                Pick <strong className="text-ink">one of ten companies</strong>.
+                Pick <strong className="font-semibold text-ink">one of ten companies</strong>.
                 You only see what an investor could have known then.
               </TutorialStep>
               <TutorialStep number={3}>
-                Make five picks at <strong className="text-ink">$2,000 each</strong>.
-                You get one Year Respin and one Rank Respin for the whole run.
+                Do this <strong className="font-semibold text-ink">five times</strong> at{" "}
+                <strong className="font-semibold text-ink">$2,000</strong> a pick. For the
+                whole run you get one Year Respin and one Rank Respin.
               </TutorialStep>
               <TutorialStep number={4}>
-                Every position is held until today. Returns stay sealed until
-                all five choices are locked.
+                Every pick is held until today. Returns stay hidden until all
+                five are locked.
               </TutorialStep>
               <TutorialStep number={5}>
-                Reach <strong className="text-amber">$1,000,000</strong> to hit
-                100X—then see the best portfolio your five boards allowed.
+                Reach <strong className="font-semibold text-lime">$1,000,000</strong> to hit
+                100X. After the reveal, see the best pick from each board you faced.
               </TutorialStep>
             </ol>
-            <p className="mt-4 text-center text-xs leading-5 text-muted">
+            <p className="mt-8 text-center text-xs leading-5 text-muted">
               Market-cap ranks, financials, and long-term values include
               gameplay estimates. Historical simulation for entertainment
-              only—not investment advice.
+              only. Not investment advice.
             </p>
             <button
               type="button"
-              className="pressable mt-7 w-full rounded-2xl bg-lime py-4 text-sm font-bold tracking-[0.2em] text-[#10210f] shadow-[0_0_32px_rgb(183_255_69/0.28)]"
+              className={`pressable mt-6 flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-base ${
+                isIntro ? "btn-lime" : "btn-quiet"
+              }`}
               onClick={onClose}
             >
-              {isIntro ? "START THE RUN" : "BACK TO GAME"}
+              {isIntro ? <RocketIcon /> : null}
+              {isIntro ? "LET'S PLAY" : "BACK TO GAME"}
             </button>
           </div>
         )}
 
         {kind === "details" && candidate && (
           <div>
-            <div className="mb-1 text-xs tracking-[0.16em] text-muted">
+            <div className="mb-1 eyebrow text-muted">
               {candidate.ticker} · #{candidate.marketCapRank} · {candidate.sectorLabel}
             </div>
             <h2 className="display text-3xl">{candidate.name}</h2>
             <div className="mt-4">
-              <div className="text-[11px] tracking-[0.18em] text-muted">OVERVIEW</div>
-              <p className="mt-2 text-sm leading-6 text-muted">{candidate.description}</p>
+              <div className="eyebrow text-muted">OVERVIEW</div>
+              <p className="mt-2 text-[15px] leading-7 text-ink/80">{candidate.description}</p>
             </div>
-            <div className="mt-4 rounded-2xl border border-amber/25 bg-[#1a2414] p-4">
-              <div className="text-[11px] tracking-[0.18em] text-amber">
-                AT THE TIME · {candidate.year}
+            <div className="company-row mt-4 rounded-2xl px-4 py-4">
+              <div className="flex items-center gap-2">
+                <ClockIcon className="size-4 text-amber" />
+                <div className="eyebrow text-amber">
+                  AT THE TIME · {candidate.year}
+                </div>
               </div>
-              <p className="mt-2 text-sm leading-6">{candidate.thenStory}</p>
+              <p className="mt-2 text-[15px] leading-7 text-ink/80">{candidate.thenStory}</p>
             </div>
-            <div className="mt-3 rounded-2xl border border-lime/20 bg-lime/[0.035] p-4">
-              <div className="text-[11px] tracking-[0.18em] text-lime">
-                {candidate.sectorLabel.toUpperCase()} · {candidate.year}
+            <div className="company-row mt-3 rounded-2xl px-4 py-4">
+              <div className="flex items-center gap-2">
+                <GridIcon className="size-4 text-lime" />
+                <div className="eyebrow text-lime">
+                  {candidate.sectorLabel.toUpperCase()} · {candidate.year}
+                </div>
               </div>
-              <p className="mt-2 text-sm leading-6 text-muted">
+              <p className="mt-2 text-[15px] leading-7 text-ink/80">
                 {candidate.sectorContext}
               </p>
             </div>
@@ -162,13 +193,13 @@ export default function Sheets({
         </div>
 
         {kind === "details" && (
-          <div className="sticky bottom-0 border-t border-white/10 bg-[#101c17] p-4">
+          <div className="sticky bottom-0 border-t border-white/10 bg-surface p-4">
             <button
               type="button"
-              className="pressable w-full rounded-2xl border border-white/10 py-3 text-sm font-semibold"
+              className="pressable btn-quiet w-full rounded-2xl py-4 text-base"
               onClick={onClose}
             >
-              Close
+              CLOSE
             </button>
           </div>
         )}

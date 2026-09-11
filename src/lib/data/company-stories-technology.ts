@@ -38,7 +38,7 @@ export const TECHNOLOGY_STORIES: Record<string, CompanyStoryProfile> = {
         then:
           "Azure, Microsoft 365, Teams, GitHub, and LinkedIn made Microsoft a broad enterprise platform, while cloud capacity and cybersecurity required sustained investment.",
         after:
-          "Microsoft agreed to acquire Activision Blizzard, expanded its OpenAI partnership, and added generative-AI features across its product line.",
+          "Microsoft agreed to acquire Activision Blizzard and, as ChatGPT drew mass attention, prepared a much larger Azure partnership with OpenAI.",
       },
       {
         year: 2023,
@@ -94,7 +94,7 @@ export const TECHNOLOGY_STORIES: Record<string, CompanyStoryProfile> = {
       {
         year: 2023,
         then:
-          "Cisco was balancing subscription growth in security and observability against component shortages, uneven product orders, and competition from cloud-managed networking.",
+          "Cisco was balancing subscription growth in security and observability against a shift from component shortages to uneven product orders, plus competition from cloud-managed networking.",
         after:
           "Cisco agreed to buy Splunk in 2023 and completed the transaction in 2024, making observability and security analytics a much larger part of the company.",
       },
@@ -177,7 +177,7 @@ export const TECHNOLOGY_STORIES: Record<string, CompanyStoryProfile> = {
         then:
           "IBM entered the recession with a broad outsourcing backlog, a profitable software portfolio, and mainframes that remained embedded in banks and governments.",
         after:
-          "The company promoted analytics and cloud computing, while financial engineering and declining legacy businesses made its long earnings roadmap harder to sustain.",
+          "The company promoted analytics and cloud computing, while heavy share repurchases and shrinking legacy businesses made its long earnings roadmap harder to sustain.",
       },
       {
         year: 2016,
@@ -321,16 +321,16 @@ export const TECHNOLOGY_STORIES: Record<string, CompanyStoryProfile> = {
       {
         year: 2007,
         then:
-          "Michael Dell had returned as CEO after quality complaints, slowing growth, and an accounting investigation exposed strains in the direct-sales machine.",
+          "Kevin Rollins ran Dell as Michael Dell remained chairman, while quality complaints, slowing growth, and an accounting investigation exposed strains in the direct-sales machine.",
         after:
-          "Dell entered retail stores, bought Perot Systems, and broadened enterprise offerings, but public-market pressure persisted.",
+          "Dell entered retail stores, bought Perot Systems, and broadened enterprise offerings after Michael Dell returned as CEO in January 2007, but public-market pressure persisted.",
       },
       {
         year: 2013,
         then:
           "Dell was negotiating Michael Dell's proposed leveraged buyout as PC shipments fell and the company tried to build a larger enterprise technology portfolio.",
         after:
-          "The buyout took Dell private, giving management room to restructure away from quarterly public-market scrutiny.",
+          "After Michael Dell returned as CEO in 2007, a leveraged buyout took Dell private, giving management room to restructure away from quarterly public-market scrutiny.",
       },
       {
         year: 2016,
@@ -381,7 +381,7 @@ export const TECHNOLOGY_STORIES: Record<string, CompanyStoryProfile> = {
         then:
           "Tim Cook had succeeded Steve Jobs, and Apple entered the year with the iPhone 4S, Siri, and an enormous share of its business tied to smartphone execution.",
         after:
-          "Apple expanded the iPhone line, introduced the Apple Watch, and built a much larger services business around its installed base.",
+          "The iPhone and App Store remade Apple, and the company later expanded the phone line, introduced the Apple Watch, and built a much larger services business around its installed base.",
       },
       {
         year: 2020,
@@ -430,7 +430,7 @@ export const TECHNOLOGY_STORIES: Record<string, CompanyStoryProfile> = {
       {
         year: 2008,
         then:
-          "GeForce was a major gaming brand and CUDA offered developers a way to use GPUs for general computing, while a defective-chip charge and AMD's ATI unit pressured the company.",
+          "GeForce was a major gaming brand and CUDA offered developers a way to use GPUs for general computing, while AMD's newly acquired ATI unit pressed the company on price and product cycles.",
         after:
           "CUDA adoption spread through scientific computing and early deep-learning work, giving Nvidia a software advantage beyond gaming graphics.",
       },
@@ -634,7 +634,7 @@ export const TECHNOLOGY_STORIES: Record<string, CompanyStoryProfile> = {
       {
         year: 2000,
         then:
-          "Jerry Sanders's AMD had broken the one-gigahertz barrier with Athlon and was mounting a credible challenge to Intel despite a much smaller manufacturing base.",
+          "Jerry Sanders's AMD had taken performance leadership with Athlon and was racing Intel toward the one-gigahertz mark despite a much smaller manufacturing base.",
         after:
           "Opteron introduced a successful 64-bit x86 design, but later product delays and Intel's Core architecture reversed AMD's momentum.",
       },
@@ -643,7 +643,7 @@ export const TECHNOLOGY_STORIES: Record<string, CompanyStoryProfile> = {
         then:
           "AMD was absorbing ATI and preparing its Barcelona server processor while price competition, integration costs, and manufacturing execution strained the company.",
         after:
-          "Barcelona was delayed, AMD lost processor share, and the company spun its factories into GlobalFoundries to reduce capital requirements.",
+          "Opteron had given AMD a 64-bit opening, but Barcelona was delayed, the company lost processor share, and it spun its factories into GlobalFoundries to reduce capital requirements.",
       },
       {
         year: 2013,
@@ -852,7 +852,7 @@ export const TECHNOLOGY_STORIES: Record<string, CompanyStoryProfile> = {
       {
         year: 2023,
         then:
-          "Enrique Lores's HP was confronting a sharp post-pandemic PC correction, weaker home printing, and excess channel inventory after an unsuccessful pursuit by Xerox.",
+          "Enrique Lores's HP was confronting a sharp post-pandemic PC correction, weaker home printing, and excess channel inventory.",
         after:
           "HP reduced headcount, worked down inventory, and promoted subscription printing and AI-capable PCs as replacement demand began to stabilize.",
       },
@@ -905,7 +905,7 @@ export const TECHNOLOGY_STORIES: Record<string, CompanyStoryProfile> = {
         then:
           "Intuit was integrating Credit Karma and Mailchimp while regulators and consumer advocates scrutinized tax-filing marketing and access to free preparation.",
         after:
-          "Intuit introduced the GenOS generative-AI platform and Intuit Assist across products, while ending participation in the IRS Free File program remained contentious.",
+          "Intuit introduced the GenOS generative-AI platform and Intuit Assist across products, while remaining a target of criticism over tax-filing marketing and access to free preparation.",
       },
     ],
     recentArc:
@@ -1128,6 +1128,13 @@ export const TECHNOLOGY_STORIES: Record<string, CompanyStoryProfile> = {
           "Avago expanded through acquisitions and focused on defensible components used in communications, industrial, and consumer systems.",
       },
       {
+        year: 2012,
+        then:
+          "Hock Tan's Avago was a public analog and communications-chip supplier, using cash flow and acquisitions to widen a portfolio still much smaller than the largest semiconductor companies.",
+        after:
+          "Avago continued buying specialized chip businesses and prepared the much larger LSI acquisition.",
+      },
+      {
         year: 2013,
         then:
           "Hock Tan's Avago was using disciplined acquisitions to broaden its semiconductor portfolio and had agreed to buy storage-connectivity specialist LSI.",
@@ -1137,16 +1144,16 @@ export const TECHNOLOGY_STORIES: Record<string, CompanyStoryProfile> = {
       {
         year: 2016,
         then:
-          "The newly renamed Broadcom combined Avago's acquisition model with Broadcom's networking, wireless-connectivity, and broadband chips, creating a large integration challenge.",
+          "Hock Tan's Avago was awaiting completion of its acquisition of Broadcom, a deal that would combine Avago's acquisition model with Broadcom's networking, wireless-connectivity, and broadband chips.",
         after:
-          "Broadcom's proposed Qualcomm takeover was blocked by the U.S. government, and the company shifted major acquisition spending toward software.",
+          "Avago completed the Broadcom acquisition in February 2016 and adopted the Broadcom name. A later proposed Qualcomm takeover was blocked by the U.S. government, and the company shifted major acquisition spending toward software.",
       },
       {
         year: 2020,
         then:
           "Broadcom was integrating CA Technologies and Symantec's enterprise-security business while still relying on chips for networking, storage, broadband, and premium smartphones.",
         after:
-          "Infrastructure software supplied more recurring revenue, and Broadcom agreed to acquire VMware in 2022.",
+          "Avago completed the Broadcom acquisition in 2016, later bought CA Technologies and Symantec's enterprise-security unit, and agreed to acquire VMware in 2022.",
       },
       {
         year: 2022,

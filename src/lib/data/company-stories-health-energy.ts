@@ -7,13 +7,13 @@ export const HEALTH_ENERGY_STORIES: Record<string, CompanyStoryProfile> = {
     moments: [
       {
         year: 2000,
-        then: "Viagra has made Pfizer unusually visible, while Lipitor, co-marketed with Warner-Lambert, is becoming central to the portfolio. Pfizer has launched a hostile bid for Warner-Lambert after American Home Products' rival agreement collapsed.",
+        then: "Viagra has made Pfizer unusually visible, while Lipitor, co-marketed with Warner-Lambert, is becoming central to the portfolio. Pfizer has launched a hostile bid to break up Warner-Lambert's merger agreement with American Home Products.",
         after: "Pfizer acquired Warner-Lambert in 2000 and gained full control of Lipitor, which became the defining product of the combined company.",
       },
       {
         year: 2003,
         then: "Pfizer has agreed to buy Pharmacia, owner of Celebrex and a major stake in Monsanto, but regulators have not yet cleared the transaction. Lipitor and Norvasc still anchor a patent-heavy product base.",
-        after: "Pfizer completed the Pharmacia acquisition in 2003 and later separated the inherited Monsanto stake.",
+        after: "Pfizer completed the Warner-Lambert merger in 2000, gaining full control of Lipitor, then bought Pharmacia in 2003 and later separated the inherited Monsanto stake.",
       },
       {
         year: 2012,
@@ -40,7 +40,7 @@ export const HEALTH_ENERGY_STORIES: Record<string, CompanyStoryProfile> = {
       },
       {
         year: 2007,
-        then: "Remicade is expanding in immune disease and Cordis sells the Cypher drug-eluting stent, but Boston Scientific has won the contest for Guidant. J&J has also agreed to acquire Pfizer's consumer-health brands, including Listerine and Nicorette.",
+        then: "Remicade is expanding in immune disease and Cordis sells the Cypher drug-eluting stent, but Boston Scientific has won the contest for Guidant. J&J has completed its acquisition of Pfizer's consumer-health brands, including Listerine and Nicorette.",
         after: "Johnson & Johnson completed the Pfizer consumer acquisition in 2006, while competition and safety concerns reduced Cypher's earlier dominance in coronary stents.",
       },
       {
@@ -461,7 +461,7 @@ export const HEALTH_ENERGY_STORIES: Record<string, CompanyStoryProfile> = {
       {
         year: 2003,
         then: "The da Vinci system has FDA clearances for several laparoscopic procedures, while Computer Motion's Zeus remains a competing robotic platform. Hospitals must still justify the systems' cost and train surgeons to use a new operating method.",
-        after: "Intuitive standardized the combined robotic-surgery platform around da Vinci and expanded its installed base through urology and gynecology procedures.",
+        after: "Intuitive acquired rival Computer Motion in 2003, standardized the combined robotic-surgery platform around da Vinci, and expanded its installed base through urology and gynecology procedures.",
       },
       {
         year: 2007,
@@ -605,13 +605,13 @@ export const HEALTH_ENERGY_STORIES: Record<string, CompanyStoryProfile> = {
     moments: [
       {
         year: 2000,
-        then: "Halliburton combines oilfield services with the Brown & Root engineering and construction business under chief executive Dick Cheney's successor, David Lesar. Energy Services supplies drilling, cementing, and completion work, while legacy construction claims complicate the group.",
-        after: "Asbestos claims inherited through Dresser pushed Halliburton toward a court-supervised settlement, and the company reorganized engineering activities under KBR.",
+        then: "Halliburton combines oilfield services with the Brown & Root engineering and construction business under chief executive Dick Cheney. Energy Services supplies drilling, cementing, and completion work, while legacy construction claims complicate the group.",
+        after: "Cheney left in August 2000 to run for vice president. Asbestos claims inherited through Dresser later pushed Halliburton toward a court-supervised settlement, and the company reorganized engineering activities under KBR.",
       },
       {
         year: 2003,
         then: "Halliburton is negotiating a global settlement of asbestos claims tied to Dresser and faces scrutiny of KBR's government work. Rising international drilling helps Energy Services, but legal uncertainty dominates capital allocation.",
-        after: "Halliburton completed an asbestos and silica settlement through Chapter 11 proceedings for affected subsidiaries and later separated KBR.",
+        after: "Cheney left in August 2000 to run for vice president. Halliburton later completed an asbestos and silica settlement through Chapter 11 proceedings for affected subsidiaries and separated KBR.",
       },
       {
         year: 2016,
@@ -709,7 +709,7 @@ export const HEALTH_ENERGY_STORIES: Record<string, CompanyStoryProfile> = {
       },
     ],
     recentArc:
-      "Through 2024, NextEra continued large renewable, storage, transmission, and FPL investments, appointed John Ketchum as its central operating leader, and worked through financing and governance changes at NextEra Energy Partners.",
+      "Through 2024, NextEra continued large renewable, storage, transmission, and FPL investments under chief executive John Ketchum, and worked through financing and governance changes at NextEra Energy Partners.",
   },
   LIN: {
     stakes:

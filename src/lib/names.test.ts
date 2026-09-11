@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { validateDisplayName } from "./names";
+import { GUEST_NAME, isGuestName, nameForSubmit, validateDisplayName } from "./names";
 
 test("accepts ordinary display names", () => {
   assert.equal(validateDisplayName("Ada").ok, true);
@@ -27,6 +27,13 @@ test("rejects hateful and obfuscated names without echoing them", () => {
       assert.match(result.error, /different name|reserved|letters/i);
     }
   }
+});
+
+test("blank submit names become the guest placeholder", () => {
+  assert.equal(nameForSubmit(""), GUEST_NAME);
+  assert.equal(nameForSubmit("  "), GUEST_NAME);
+  assert.equal(isGuestName(GUEST_NAME), true);
+  assert.equal(isGuestName("Ada"), false);
 });
 
 test("rejects oversized or symbolic names", () => {
