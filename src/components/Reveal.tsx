@@ -128,16 +128,18 @@ function BestPossibleRow({ pick }: { pick: BestPossiblePick }) {
   return (
     <div className="flex items-center justify-between gap-4 border-b border-amber/15 py-3 last:border-0">
       <div className="min-w-0">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="display text-lg">{pick.name}</span>
+        <div className="display truncate text-lg" title={pick.name}>
+          {pick.name}
+        </div>
+        <div className="mt-0.5 flex min-w-0 flex-wrap items-center gap-2 text-xs text-muted">
+          <span>
+            {pick.ticker} · {pick.year} · {pick.bandLabel}
+          </span>
           {pick.wasSelected ? (
             <span className="rounded-full border border-lime/30 bg-lime/10 px-2 py-0.5 text-[9px] tracking-[0.14em] text-lime">
               YOU PICKED IT
             </span>
           ) : null}
-        </div>
-        <div className="text-xs text-muted">
-          {pick.ticker} · {pick.year} · {pick.bandLabel}
         </div>
       </div>
       <div className="shrink-0 text-right">
