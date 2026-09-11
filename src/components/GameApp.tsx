@@ -1,6 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import {
   createGame,
   loadGame,
@@ -9,7 +15,7 @@ import {
   revealGame,
   spinGame,
 } from "@/lib/api";
-import { bandCopy, formatHoldReturn } from "@/lib/format";
+import { formatHoldReturn } from "@/lib/format";
 import {
   PICK_STAKE,
   STARTING_BANKROLL,
@@ -27,13 +33,13 @@ import Vault from "./Vault";
 
 const GAME_KEY = "tenx-game-id";
 const INTRO_KEY = "100x-intro-seen-v2";
+const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 
 type UiPhase =
   | "boot"
   | "ready"
   | "spinning"
   | "choosing"
-  | "awaitingReveal"
   | "revealing"
   | "results";
 
@@ -41,11 +47,18 @@ type SpinTarget = "both" | "year" | "rank";
 
 function applySession(session: PublicSession): UiPhase {
   if (session.status === "revealed") return "results";
-  if (session.status === "awaitingReveal" || session.picks.length >= 5) {
-    return "awaitingReveal";
-  }
   if (session.currentBoard) return "choosing";
   return "ready";
+}
+
+function subscribeToReducedMotion(onChange: () => void) {
+  const media = window.matchMedia(REDUCED_MOTION_QUERY);
+  media.addEventListener("change", onChange);
+  return () => media.removeEventListener("change", onChange);
+}
+
+function getReducedMotion() {
+  return window.matchMedia(REDUCED_MOTION_QUERY).matches;
 }
 
 export default function GameApp() {
@@ -53,7 +66,7 @@ export default function GameApp() {
   const [phase, setPhase] = useState<UiPhase>("boot");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [sort, setSort] = useState<SortKey>("mcap");
-  const [sheet, setSheet] = useState<"how" | "method" | "details" | "intro" | null>(
+  const [sheet, setSheet] = useState<"how" | "details" | "intro" | null>(
     null,
   );
   const [detailId, setDetailId] = useState<string | null>(null);
@@ -62,21 +75,17 @@ export default function GameApp() {
   const [skipped, setSkipped] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [reducedMotion, setReducedMotion] = useState(false);
+  const reducedMotion = useSyncExternalStore(
+    subscribeToReducedMotion,
+    getReducedMotion,
+    () => false,
+  );
   const [spinTarget, setSpinTarget] = useState<SpinTarget>("both");
 
   const board = session?.currentBoard ?? null;
   const selected = board?.candidates.find((c) => c.id === selectedId) ?? null;
   const detailCandidate: PublicCandidate | null =
     board?.candidates.find((c) => c.id === detailId) ?? null;
-
-  useEffect(() => {
-    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReducedMotion(media.matches);
-    const onChange = () => setReducedMotion(media.matches);
-    media.addEventListener("change", onChange);
-    return () => media.removeEventListener("change", onChange);
-  }, []);
 
   const startFresh = useCallback(async () => {
     const next = await createGame();
@@ -99,13 +108,18 @@ export default function GameApp() {
         if (cancelled) return;
         if (loaded) {
           setSession(loaded);
-          if (loaded.status === "revealed") {
+          if (
+            loaded.status === "revealed" ||
+            loaded.status === "awaitingReveal"
+          ) {
             const viewed = await revealGame(loaded.id);
             if (cancelled) return;
             setSession(viewed);
             setReveal(viewed.reveal);
-            setSkipped(true);
-            setPhase("results");
+            const alreadyRevealed = loaded.status === "revealed";
+            setRevealIndex(alreadyRevealed ? viewed.reveal?.picks.length ?? 5 : -1);
+            setSkipped(alreadyRevealed);
+            setPhase(alreadyRevealed ? "results" : "revealing");
           } else {
             setPhase(applySession(loaded));
           }
@@ -178,27 +192,18 @@ export default function GameApp() {
       const next = await pickGame(session.id, selectedId);
       setSession(next);
       setSelectedId(null);
-      if (next.status === "awaitingReveal") setPhase("awaitingReveal");
-      else setPhase("ready");
+      if (next.status === "awaitingReveal") {
+        const revealed = await revealGame(next.id);
+        setSession(revealed);
+        setReveal(revealed.reveal);
+        setRevealIndex(-1);
+        setSkipped(false);
+        setPhase("revealing");
+      } else {
+        setPhase("ready");
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Lock failed");
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const startReveal = async () => {
-    if (!session) return;
-    setBusy(true);
-    try {
-      const next = await revealGame(session.id);
-      setSession(next);
-      setReveal(next.reveal);
-      setRevealIndex(0);
-      setSkipped(false);
-      setPhase("revealing");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Reveal failed");
     } finally {
       setBusy(false);
     }
@@ -210,10 +215,13 @@ export default function GameApp() {
 
   const share = async () => {
     if (!reveal) return;
+    const bestPickCount = reveal.bestPossiblePicks.filter(
+      (pick) => pick.wasSelected,
+    ).length;
     const text = [
       `100X`,
       `$${STARTING_BANKROLL.toLocaleString()} → ${Math.round(reveal.endingBankroll).toLocaleString()}`,
-      `${reveal.multiplier.toFixed(2)}X · Beat the Board ${reveal.beatTheBoard}/5`,
+      `${reveal.multiplier.toFixed(2)}X · Found ${bestPickCount} of 5 best available picks`,
       `Best possible from my boards: $${Math.round(reveal.oracleBankroll).toLocaleString()}`,
       ...reveal.picks.map(
         (pick) => `${pick.ticker} ${pick.year}  ${formatHoldReturn(pick.forwardTotalReturn)}`,
@@ -229,7 +237,7 @@ export default function GameApp() {
 
   const prompt = useMemo(() => {
     if (!board) return "One spin locks a year and a market-cap band.";
-    return `Model a hold from ${board.entryDate.replace(/-/g, ".")} to today. Choose from the estimated ${bandCopy(board.rankStart, board.rankEnd)} in ${board.year}.`;
+    return `Put $${PICK_STAKE.toLocaleString()} on one company in ${board.year}. Hold until today.`;
   }, [board]);
 
   if (!session || phase === "boot") {
@@ -241,43 +249,31 @@ export default function GameApp() {
   }
 
   return (
-    <div id="root-game" className="mx-auto min-h-dvh max-w-[1180px] px-4 pb-8 pt-3">
-      <header className="sticky top-0 z-20 -mx-4 mb-3 flex items-center justify-between bg-[#07110d]/88 px-4 py-3 backdrop-blur-md">
+    <div id="root-game" className="mx-auto min-h-dvh max-w-[1280px] overflow-x-clip px-3 pb-8 pt-2 sm:px-4 sm:pt-3">
+      <header className="sticky top-0 z-20 -mx-3 mb-3 flex items-center justify-between bg-[#07110d]/88 px-3 py-3 backdrop-blur-md sm:-mx-4 sm:px-4 lg:mx-0 lg:rounded-2xl lg:border lg:border-white/[0.06]">
         <div className="display text-2xl font-semibold tracking-tight">
           100<span className="text-lime">X</span>
         </div>
-        <div className="text-xs tracking-[0.18em] text-muted">
+        <div className="text-[10px] tracking-[0.16em] text-muted sm:text-xs sm:tracking-[0.18em]">
           ROUND {session.round} OF 5
         </div>
         <button
           type="button"
-          className="rounded-full border border-white/10 px-3 py-2 text-xs tracking-[0.14em] text-muted"
+          className="whitespace-nowrap rounded-full border border-white/10 px-2.5 py-2 text-[10px] tracking-[0.12em] text-muted sm:px-3 sm:text-xs sm:tracking-[0.14em]"
           onClick={() => setSheet("how")}
         >
-          RULES
+          HOW IT WORKS
         </button>
       </header>
 
-      <div className="mb-4 lg:hidden">
+      <div className="mx-auto mb-3 w-full max-w-3xl lg:hidden">
         <Vault picks={session.picks} compact />
       </div>
 
-      <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
-        <main>
-          <p className="mb-5 max-w-md text-sm text-muted">
-            Pick five stocks from the past. Model the long hold. Turn $10K into $1M.
-          </p>
-
+      <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_400px] xl:grid-cols-[minmax(0,1fr)_420px]">
+        <main className="mx-auto w-full min-w-0 max-w-3xl lg:mx-0 lg:max-w-none">
           {(phase === "ready" || phase === "spinning") && (
             <div className="flex min-h-[58vh] flex-col items-center justify-center pt-2">
-              {session.picks.length > 0 && (
-                <p className="mb-8 text-center text-sm text-muted">
-                  {session.picks[session.picks.length - 1].name} ·{" "}
-                  {session.picks[session.picks.length - 1].year} is sealed.
-                  <br />
-                  {5 - session.picks.length} pick{5 - session.picks.length === 1 ? "" : "s"} left.
-                </p>
-              )}
               <Reels
                 year={board?.year ?? null}
                 band={board?.bandLabel ?? null}
@@ -293,36 +289,28 @@ export default function GameApp() {
               >
                 {phase === "spinning" ? "SPINNING" : "SPIN"}
               </button>
-              <div className="mt-6 flex gap-4 text-xs text-muted">
-                <button type="button" onClick={() => setSheet("how")}>
-                  How it works
-                </button>
-                <button type="button" onClick={() => setSheet("method")}>
-                  Methodology
-                </button>
-              </div>
             </div>
           )}
 
           {phase === "choosing" && board && (
             <div className="rise-in">
-              <div className="mb-4 flex flex-wrap items-center gap-3">
-                <div className="rounded-2xl border border-lime/40 px-4 py-2">
+              <div className="mb-3 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-3">
+                <div className="rounded-xl border border-lime/40 px-3 py-2 sm:rounded-2xl sm:px-4">
                   <div className="text-[10px] tracking-[0.18em] text-lime">YEAR</div>
-                  <div className="display text-2xl">{board.year}</div>
+                  <div className="display text-xl sm:text-2xl">{board.year}</div>
                 </div>
-                <div className="rounded-2xl border border-amber/40 px-4 py-2">
+                <div className="rounded-xl border border-amber/40 px-3 py-2 sm:rounded-2xl sm:px-4">
                   <div className="text-[10px] tracking-[0.18em] text-amber">
-                    EST. MARKET CAP
+                    MARKET CAP
                   </div>
-                  <div className="display text-2xl">{board.bandLabel}</div>
+                  <div className="display text-xl sm:text-2xl">{board.bandLabel}</div>
                 </div>
-                <div className="ml-auto flex gap-2">
+                <div className="col-span-2 flex justify-end gap-2 sm:ml-auto">
                   <button
                     type="button"
                     disabled={session.yearRespinUsed || busy}
                     onClick={() => respin("year")}
-                    className="rounded-full border border-white/10 px-3 py-2 text-[11px] tracking-[0.12em] disabled:opacity-40"
+                    className="rounded-full border border-white/10 px-3 py-1.5 text-[10px] tracking-[0.1em] disabled:opacity-40 sm:py-2 sm:text-[11px] sm:tracking-[0.12em]"
                   >
                     {session.yearRespinUsed ? "YEAR USED" : "YEAR RESPIN"}
                   </button>
@@ -330,26 +318,41 @@ export default function GameApp() {
                     type="button"
                     disabled={session.rankRespinUsed || busy}
                     onClick={() => respin("rank")}
-                    className="rounded-full border border-white/10 px-3 py-2 text-[11px] tracking-[0.12em] disabled:opacity-40"
+                    className="rounded-full border border-white/10 px-3 py-1.5 text-[10px] tracking-[0.1em] disabled:opacity-40 sm:py-2 sm:text-[11px] sm:tracking-[0.12em]"
                   >
                     {session.rankRespinUsed ? "RANK USED" : "RANK RESPIN"}
                   </button>
                 </div>
               </div>
-              <p className="mb-4 text-sm text-muted">{prompt}</p>
+              <p className="mb-4 hidden text-sm text-muted sm:block">{prompt}</p>
               {board.climate && (
-                <div className="mb-4 rounded-2xl border border-white/10 p-4">
+                <>
+                  <details
+                    open
+                    className="mb-3 rounded-xl border border-white/10 px-4 py-3 lg:hidden"
+                  >
+                    <summary className="cursor-pointer list-none">
+                      <span className="block text-[11px] tracking-[0.16em] text-amber">
+                        {board.year} · WORLD THEN
+                      </span>
+                      <span className="display mt-1 block text-lg text-ink">
+                        {board.climate.kicker}
+                      </span>
+                    </summary>
+                    <p className="mt-2 text-sm leading-6 text-muted">
+                      {board.climate.body}
+                    </p>
+                  </details>
+                  <div className="mb-4 hidden rounded-2xl border border-white/10 p-4 lg:block">
                   <div className="text-[11px] tracking-[0.18em] text-amber">
                       {board.year} · THE WORLD THEN
                   </div>
                   <div className="display mt-1 text-xl">{board.climate.kicker}</div>
                   <p className="mt-2 text-sm leading-6 text-muted">{board.climate.body}</p>
-                </div>
+                  </div>
+                </>
               )}
-              <div className="mb-2 text-[11px] tracking-[0.18em] text-amber">
-                MODELED VALUE · SEALED
-              </div>
-              <p className="mb-3 text-xs leading-5 text-muted">
+              <p className="mb-3 hidden text-xs leading-5 text-muted sm:block">
                 Ranks and financials are gameplay estimates.
               </p>
               <CompanyList
@@ -366,19 +369,17 @@ export default function GameApp() {
             </div>
           )}
 
-          {phase === "awaitingReveal" && (
-            <div className="rise-in flex flex-col items-center py-10 text-center">
-              <div className="display text-4xl">Five sealed modeled holds.</div>
-              <p className="mt-3 max-w-sm text-muted">
-                Five modeled positions of ${PICK_STAKE.toLocaleString()} each.
-                Their estimated values are still hidden.
-              </p>
+          {phase === "choosing" && (
+            <div className="fixed inset-x-0 bottom-0 z-30 flex justify-center border-t border-white/10 bg-[#07110d]/92 px-4 py-3 backdrop-blur-md lg:static lg:mt-4 lg:block lg:border-0 lg:bg-transparent lg:p-0 lg:backdrop-blur-0">
               <button
                 type="button"
-                className="pressable mt-8 rounded-2xl bg-lime px-10 py-3.5 text-sm font-bold tracking-[0.18em] text-[#10210f]"
-                onClick={startReveal}
+                disabled={!selected || busy}
+                onClick={lock}
+                className="pressable w-full max-w-3xl rounded-2xl bg-lime py-3.5 text-sm font-bold tracking-[0.16em] text-[#10210f] disabled:opacity-40 lg:max-w-none"
               >
-                REVEAL MODELED VALUES
+                {selected
+                  ? `LOCK IN ${selected.name.toUpperCase()}`
+                  : "SELECT A COMPANY"}
               </button>
             </div>
           )}
@@ -388,19 +389,6 @@ export default function GameApp() {
           <Vault picks={session.picks} />
         </aside>
       </div>
-
-      {phase === "choosing" && (
-        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-white/10 bg-[#07110d]/92 px-4 py-3 backdrop-blur-md lg:static lg:mt-4 lg:border-0 lg:bg-transparent lg:p-0 lg:backdrop-blur-0">
-          <button
-            type="button"
-            disabled={!selected || busy}
-            onClick={lock}
-            className="pressable w-full rounded-2xl bg-lime py-3.5 text-sm font-bold tracking-[0.16em] text-[#10210f] disabled:opacity-40"
-          >
-            {selected ? `LOCK IN ${selected.name.toUpperCase()}` : "SELECT A COMPANY"}
-          </button>
-        </div>
-      )}
 
       {error && (
         <div className="fixed bottom-24 left-1/2 z-40 -translate-x-1/2 rounded-full bg-coral/15 px-4 py-2 text-sm text-coral">

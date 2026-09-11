@@ -38,7 +38,7 @@ export default function Sheets({
   candidate,
   onClose,
 }: {
-  kind: "how" | "method" | "details" | "intro" | null;
+  kind: "how" | "details" | "intro" | null;
   candidate: PublicCandidate | null;
   onClose: () => void;
 }) {
@@ -122,16 +122,20 @@ export default function Sheets({
             <p>Read the fact-checked world, sector, and company context. The gameplay model&apos;s estimated long-term value stays sealed until the end.</p>
             <p>You get one Year Respin and one Rank Respin for the whole run.</p>
             <p>Your $10,000 splits into five $2,000 positions. Their modeled values are added together. Hit $1,000,000 to go 100X.</p>
-          </div>
-        )}
-
-        {kind === "method" && (
-          <div className="space-y-3 text-sm leading-6">
-            <h2 className="display text-2xl">Methodology</h2>
-            <p>Historical prose is anchored to each entry date. Company names and descriptions change when major mergers, renamings, or business shifts would otherwise create hindsight.</p>
-            <p>World and sector notes draw on contemporaneous Federal Reserve, IMF, World Bank, and WTO reporting. Every company card uses dated products, deals, leadership changes, and other documented company history available by that entry date—not a peek at later returns.</p>
-            <p>Market-cap ranks, financials, and long-term values combine manually curated estimates with deterministic modeled data. They are not licensed quotes, audited point-in-time fundamentals, or verified total-return series.</p>
-            <p>Historical simulation for entertainment only. Not investment advice. No real money or trading.</p>
+            <div className="border-t border-white/10 pt-3">
+              <h3 className="display text-lg">About the estimates</h3>
+              <p className="mt-2 text-muted">
+                Historical context is anchored to each entry date using
+                contemporaneous reporting and documented company history.
+                Market-cap ranks, financials, and long-term values include
+                deterministic gameplay estimates—not licensed quotes or
+                audited total-return data.
+              </p>
+              <p className="mt-2 text-muted">
+                Historical simulation for entertainment only. Not investment
+                advice. No real money or trading.
+              </p>
+            </div>
           </div>
         )}
 

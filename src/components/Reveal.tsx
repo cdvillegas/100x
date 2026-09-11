@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   formatHoldReturn,
   formatMoney,
@@ -13,24 +13,24 @@ import type {
   RevealPayload,
   RevealedPick,
 } from "@/lib/types";
-import { TARGET_BANKROLL } from "@/lib/types";
+import { STARTING_BANKROLL, TARGET_BANKROLL } from "@/lib/types";
 
 function CountUp({
+  from = 0,
   value,
   reducedMotion,
+  formatter = formatMoney,
 }: {
+  from?: number;
   value: number;
   reducedMotion: boolean;
+  formatter?: (value: number) => string;
 }) {
-  const [shown, setShown] = useState(reducedMotion ? value : 0);
+  const [shown, setShown] = useState(reducedMotion ? value : from);
 
   useEffect(() => {
-    if (reducedMotion) {
-      setShown(value);
-      return;
-    }
+    if (reducedMotion) return;
     const start = performance.now();
-    const from = 0;
     const tick = (now: number) => {
       const t = Math.min(1, (now - start) / 700);
       const eased = 1 - Math.pow(1 - t, 3);
@@ -39,56 +39,86 @@ function CountUp({
     };
     const id = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(id);
-  }, [value, reducedMotion]);
+  }, [from, value, reducedMotion]);
 
-  return <span className="tabular">{formatMoney(shown)}</span>;
+  return (
+    <span className="tabular">
+      {formatter(reducedMotion ? value : shown)}
+    </span>
+  );
 }
 
-function PickCard({
+function RevealSlot({
   pick,
+  slot,
   active,
+  reducedMotion,
 }: {
-  pick: RevealedPick;
+  pick: RevealedPick | null;
+  slot: number;
   active: boolean;
+  reducedMotion: boolean;
 }) {
+  if (!pick) {
+    return (
+      <div className="flex h-28 items-center rounded-2xl border border-white/[0.07] bg-white/[0.015] px-4">
+        <span className="text-[10px] tracking-[0.2em] text-muted/40">
+          {String(slot + 1).padStart(2, "0")}
+        </span>
+      </div>
+    );
+  }
+
   const tone = signedClass(pick.forwardTotalReturn);
   return (
     <div
-      className={`rounded-2xl border px-4 py-4 ${
-        active ? "border-lime/50 bg-[#163225]" : "border-white/10 bg-[#12211b]"
+      className={`rise-in h-28 rounded-2xl border px-4 py-3 has-[details[open]]:h-auto ${
+        active
+          ? "border-lime/60 bg-[#163225] shadow-[0_0_32px_rgb(176_255_72_/_0.1)]"
+          : "border-white/10 bg-[#12211b]"
       }`}
     >
-      <div className="text-xs tracking-[0.16em] text-muted">
-        {pick.year} · {pick.bandLabel} · held {Math.round(pick.yearsHeld * 10) / 10} years
-      </div>
-      <div className="mt-1 flex items-end justify-between gap-3">
-        <div>
-          <div className="display text-2xl">{pick.name}</div>
-          <div className="text-sm text-muted">
-            {pick.ticker} · {formatMoney(pick.entryBankroll)} then
+      <div className="flex min-h-14 items-center justify-between gap-4">
+        <div className="min-w-0">
+          <div className="text-[10px] tracking-[0.14em] text-muted">
+            {pick.year} · {pick.bandLabel} · #{pick.forwardRank} of 10
+          </div>
+          <div className="mt-0.5 truncate text-lg font-semibold">{pick.name}</div>
+          <div className="text-xs text-muted">{pick.ticker} · $2,000</div>
+        </div>
+        <div className="shrink-0 text-right">
+          <div
+            className={`display text-2xl ${
+              tone === "up"
+                ? "text-lime"
+                : tone === "down"
+                  ? "text-coral"
+                  : "text-ink"
+            }`}
+          >
+            {active ? (
+              <CountUp
+                key={pick.candidateId}
+                value={pick.todayValue}
+                reducedMotion={reducedMotion}
+              />
+            ) : (
+              formatMoney(pick.todayValue)
+            )}
+          </div>
+          <div className="text-xs text-muted">
+            {formatHoldReturn(pick.forwardTotalReturn)}
           </div>
         </div>
-        <div
-          className={`display text-3xl ${
-            tone === "up" ? "text-lime" : tone === "down" ? "text-coral" : "text-ink"
-          }`}
-        >
-          {formatHoldReturn(pick.forwardTotalReturn)}
-        </div>
-      </div>
-      <div className="mt-3 text-sm text-muted">
-        {formatMoney(pick.todayValue)} modeled value · #{pick.forwardRank} of 10 ·{" "}
-        {pick.beatBoard ? "Beat the board" : "Trailed the board"}
       </div>
       {pick.outcomeNotes ? (
-        <div className="mt-3">
-          <div className="text-[10px] tracking-[0.18em] text-lime/80">
-            WHAT HAPPENED NEXT
-          </div>
-          <p className="mt-1.5 text-sm leading-6 text-ink/90">
-            {pick.outcomeNotes}
-          </p>
-        </div>
+        <details className="group mt-2 border-t border-white/[0.07] pt-2">
+          <summary className="cursor-pointer list-none text-[10px] tracking-[0.16em] text-muted transition-colors hover:text-ink">
+            <span className="group-open:hidden">WHAT HAPPENED?</span>
+            <span className="hidden group-open:inline">HIDE STORY</span>
+          </summary>
+          <p className="mt-2 text-sm leading-6 text-ink/85">{pick.outcomeNotes}</p>
+        </details>
       ) : null}
     </div>
   );
@@ -140,91 +170,98 @@ export default function Reveal({
   onShare: () => void;
 }) {
   const done = skipped || index >= payload.picks.length;
-  const current = payload.picks[Math.min(index, payload.picks.length - 1)];
-  const summary = useMemo(
-    () =>
-      payload.picks
-        .map((pick) => `${pick.ticker} ${pick.year} ${formatHoldReturn(pick.forwardTotalReturn)}`)
-        .join(" · "),
-    [payload.picks],
-  );
+  const runningTotal =
+    index < 0
+      ? 0
+      : index >= payload.picks.length
+      ? payload.endingBankroll
+      : payload.picks[index].exitBankroll;
+  const previousTotal = index > 0 ? payload.picks[index - 1].exitBankroll : 0;
+  const runningMultiplier = runningTotal / STARTING_BANKROLL;
+  const previousMultiplier = previousTotal / STARTING_BANKROLL;
+  const bestPickCount = payload.bestPossiblePicks.filter(
+    (pick) => pick.wasSelected,
+  ).length;
 
   useEffect(() => {
-    if (done || reducedMotion) return;
-    const timer = window.setTimeout(onAdvance, 950);
+    if (done) return;
+    const delay = reducedMotion ? 180 : index < 0 ? 450 : 1050;
+    const timer = window.setTimeout(onAdvance, delay);
     return () => window.clearTimeout(timer);
   }, [done, index, reducedMotion, onAdvance]);
 
   return (
     <div className="fixed inset-0 z-40 overflow-y-auto bg-[#07110d]/96 px-4 py-6">
-      <div className="mx-auto flex min-h-full max-w-xl flex-col justify-center">
-        {!done ? (
-          <>
-            <div className="mb-4 flex items-center justify-between text-xs tracking-[0.16em] text-muted">
-              <span>
-                REVEAL {index + 1} OF {payload.picks.length}
-              </span>
-              <button type="button" onClick={onSkip} className="text-ink">
-                Skip reveal
-              </button>
+      <div className="mx-auto min-h-full max-w-2xl">
+        <div className="mb-4 flex items-center justify-between text-xs tracking-[0.16em] text-muted">
+          <span>
+            {done
+              ? "YOUR RESULTS"
+              : index < 0
+                ? "GET READY"
+                : `REVEAL ${index + 1} OF ${payload.picks.length}`}
+          </span>
+          {!done ? (
+            <button type="button" onClick={onSkip} className="text-ink">
+              Skip reveal
+            </button>
+          ) : null}
+        </div>
+
+        <div className="mb-4 rounded-2xl border border-lime/20 bg-lime/[0.025] px-4 py-3 sm:px-5 sm:py-4">
+          <div className="text-[10px] tracking-[0.18em] text-muted">
+            {done ? "FINAL PORTFOLIO" : "PORTFOLIO VALUE"}
+          </div>
+          <div className="mt-1 flex items-end justify-between gap-4">
+            <div className="display text-4xl font-semibold sm:text-5xl">
+              <CountUp
+                key={`total-${index}-${done}`}
+                from={done ? payload.endingBankroll : previousTotal}
+                value={runningTotal}
+                reducedMotion={reducedMotion}
+              />
             </div>
-            <PickCard pick={current} active />
-            <div className="mt-5 rounded-2xl border border-white/10 p-4">
-              <div className="text-[11px] tracking-[0.16em] text-muted">MODELED PORTFOLIO</div>
-              <div className="display text-4xl text-lime">
+            <div className="text-right">
+              <div className="display text-2xl text-lime sm:text-3xl">
                 <CountUp
-                  value={current.exitBankroll}
+                  key={`multiplier-${index}-${done}`}
+                  from={done ? payload.multiplier : previousMultiplier}
+                  value={runningMultiplier}
                   reducedMotion={reducedMotion}
+                  formatter={formatMultiplier}
                 />
               </div>
+              {done ? (
+                <div className="text-xs text-muted">{tierLabel(payload.tier)}</div>
+              ) : null}
             </div>
-            <button
-              type="button"
-              className="pressable mt-5 rounded-2xl bg-lime py-3.5 text-sm font-bold tracking-[0.16em] text-[#10210f]"
-              onClick={onAdvance}
-            >
-              CONTINUE
-            </button>
-          </>
-        ) : (
+          </div>
+          <div className="mt-1 text-xs text-muted">
+            Target {formatMoney(TARGET_BANKROLL)}
+          </div>
+        </div>
+
+        <div className="grid gap-2">
+          {payload.picks.map((pick, slot) => (
+            <RevealSlot
+              key={pick.candidateId}
+              pick={done || slot <= index ? pick : null}
+              slot={slot}
+              active={!done && slot === index}
+              reducedMotion={reducedMotion}
+            />
+          ))}
+        </div>
+
+        {done ? (
           <div className="rise-in">
-            <div className="text-xs tracking-[0.18em] text-muted">MODELED FINAL BANKROLL</div>
-            <div className="display text-5xl font-semibold">
-              {formatMoney(payload.endingBankroll)}
-            </div>
-            <div className="mt-2 flex items-baseline gap-3">
-              <div className="display text-3xl text-lime">
-                {formatMultiplier(payload.multiplier)}
-              </div>
-              <div className="text-muted">{tierLabel(payload.tier)}</div>
-            </div>
-            <div className="mt-1 text-sm text-muted">
-              Target {formatMoney(TARGET_BANKROLL)}
-            </div>
-            <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
-              <div className="rounded-2xl border border-white/10 p-3">
-                Beat the Board
-                <div className="display text-2xl">{payload.beatTheBoard}/5</div>
-              </div>
-              <div className="rounded-2xl border border-white/10 p-3">
-                Hindsight ceiling
-                <div className="display text-2xl">
-                  {formatMoney(payload.oracleBankroll)}
-                </div>
-              </div>
-            </div>
-            <div className="mt-4 grid gap-2">
-              {payload.picks.map((pick) => (
-                <PickCard key={pick.candidateId} pick={pick} active={false} />
-              ))}
-            </div>
             <div className="mt-6 rounded-2xl border border-amber/45 bg-amber/[0.045] p-4">
               <div className="text-[11px] tracking-[0.18em] text-amber">
-                BEST PORTFOLIO YOU COULD&apos;VE BUILT
+                BEST PORTFOLIO AVAILABLE
               </div>
               <p className="mt-1 text-xs leading-5 text-muted">
-                The highest modeled-value company available on each of the five
-                boards you spun—not a perfect pick from the entire market.
+                The best-performing company from each of your five boards.
+                You found {bestPickCount} of 5.
               </p>
               <div className="mt-2">
                 {payload.bestPossiblePicks.map((pick) => (
@@ -233,7 +270,7 @@ export default function Reveal({
               </div>
               <div className="mt-3 flex items-end justify-between gap-4 border-t border-amber/25 pt-3">
                 <div>
-                  <div className="text-xs text-muted">Hindsight bankroll</div>
+                  <div className="text-xs text-muted">Best possible total</div>
                   <div className="display text-3xl text-amber">
                     {formatMoney(payload.oracleBankroll)}
                   </div>
@@ -242,12 +279,11 @@ export default function Reveal({
                   {formatMoney(
                     Math.max(0, payload.oracleBankroll - payload.endingBankroll),
                   )}{" "}
-                  beyond your picks
+                  more than your picks
                 </div>
               </div>
             </div>
-            <p className="mt-4 hidden text-xs text-muted">{summary}</p>
-            <div className="mt-5 grid gap-3">
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
               <button
                 type="button"
                 className="pressable rounded-2xl bg-lime py-3.5 text-sm font-bold tracking-[0.16em] text-[#10210f]"
@@ -264,7 +300,7 @@ export default function Reveal({
               </button>
             </div>
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );
