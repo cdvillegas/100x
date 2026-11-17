@@ -18,17 +18,15 @@ const display = Space_Grotesk({
   weight: ["500", "600", "700"],
 });
 
-const siteUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
-  ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-  : "https://100x-brown.vercel.app";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://100x.chrisvillegas.com";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: "100X — Pick five stocks from the past",
+  title: "100X — Turn $10K into $1M",
   description: "Pick five stocks from the past. Turn $10K into $1M.",
   applicationName: "100X",
   openGraph: {
-    title: "100X — Pick five stocks from the past",
+    title: "100X — Turn $10K into $1M",
     description: "Pick five stocks from the past. Turn $10K into $1M.",
     siteName: "100X",
     type: "website",
@@ -36,7 +34,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "100X — Pick five stocks from the past",
+    title: "100X — Turn $10K into $1M",
     description: "Pick five stocks from the past. Turn $10K into $1M.",
   },
 };

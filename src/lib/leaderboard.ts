@@ -38,27 +38,81 @@ export interface LeaderboardBoard {
   placement: PeriodPlacement | null;
 }
 
-export const LEADERBOARD_LIMIT = 25;
+export const LEADERBOARD_LIMIT = 10;
+export const BOARD_TIMEZONE = "America/Los_Angeles";
+
+function calendarDate(now: Date, timeZone = BOARD_TIMEZONE) {
+  const [year, month, day] = new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  })
+    .format(now)
+    .split("-")
+    .map(Number);
+  return { year, month, day };
+}
+
+function weekdayInZone(now: Date, timeZone = BOARD_TIMEZONE) {
+  const name = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    weekday: "short",
+  }).format(now);
+  return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].indexOf(name);
+}
+
+function addCalendarDays(
+  year: number,
+  month: number,
+  day: number,
+  days: number,
+) {
+  const next = new Date(Date.UTC(year, month - 1, day + days));
+  return {
+    year: next.getUTCFullYear(),
+    month: next.getUTCMonth() + 1,
+    day: next.getUTCDate(),
+  };
+}
+
+function startOfZonedDay(
+  year: number,
+  month: number,
+  day: number,
+  timeZone = BOARD_TIMEZONE,
+) {
+  const utcNoon = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
+  const hour = Number(
+    new Intl.DateTimeFormat("en-US", {
+      timeZone,
+      hour: "numeric",
+      hourCycle: "h23",
+    }).format(utcNoon),
+  );
+  return new Date(Date.UTC(year, month - 1, day, 12 - hour, 0, 0));
+}
 
 export function periodBounds(period: LeaderboardPeriod, now = new Date()) {
   if (period === "all") return { start: null, end: null };
 
-  const start = new Date(
-    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
+  const today = calendarDate(now);
+  const weekday = weekdayInZone(now);
+  const startDay =
+    period === "daily"
+      ? today
+      : addCalendarDays(today.year, today.month, today.day, weekday === 0 ? -6 : 1 - weekday);
+  const endDay = addCalendarDays(
+    startDay.year,
+    startDay.month,
+    startDay.day,
+    period === "daily" ? 1 : 7,
   );
 
-  if (period === "daily") {
-    const end = new Date(start);
-    end.setUTCDate(end.getUTCDate() + 1);
-    return { start, end };
-  }
-
-  const weekday = start.getUTCDay();
-  const mondayOffset = weekday === 0 ? -6 : 1 - weekday;
-  start.setUTCDate(start.getUTCDate() + mondayOffset);
-  const end = new Date(start);
-  end.setUTCDate(end.getUTCDate() + 7);
-  return { start, end };
+  return {
+    start: startOfZonedDay(startDay.year, startDay.month, startDay.day),
+    end: startOfZonedDay(endDay.year, endDay.month, endDay.day),
+  };
 }
 
 export function inPeriod(
@@ -162,7 +216,7 @@ export function buildBoard(
           period,
           rank: you.rank,
           total: scoped.length,
-          topTen: you.rank <= 10,
+          topTen: you.rank <= LEADERBOARD_LIMIT,
           first: you.rank === 1,
         }
       : null,

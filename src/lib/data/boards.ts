@@ -3,7 +3,9 @@ import type { EraNote, PublicBoard, PublicCandidate } from "../types";
 import { ENTRY_DATES, resolveFirm, type RawRow } from "./fixtures";
 import {
   AS_OF_DATE,
+  holdOutcomeNote,
   holdReturn,
+  entrySharePrice,
   yearsHeld,
 } from "./hold-returns";
 import { sectorLabel, sectorOf } from "./sectors";
@@ -30,7 +32,7 @@ export interface FullBoard {
   boardAverage: number;
 }
 
-export const METHODOLOGY_VERSION = "hold-to-today-v1";
+export const METHODOLOGY_VERSION = "hold-to-today-v2-split-adjusted";
 
 function pct(value: number | null): number | null {
   return value == null ? null : value / 100;
@@ -57,14 +59,15 @@ function toCandidate(
     sectorLabel: sectorLabel(sector),
     sectorContext: sectorContext(year, sector),
     marketCapRank: rank,
-    marketCap: mcapB * 1e9,
+    marketCap: mcapB == null ? null : mcapB * 1e9,
     revenue: revenueB == null ? null : revenueB * 1e9,
     revenueGrowth: pct(growthPct),
     netMargin: pct(marginPct),
     peRatio: pe,
     trailingReturn: pct(trailPct),
+    entrySharePrice: entrySharePrice(year, ticker),
     forwardTotalReturn: fwd,
-    outcomeNotes: afterStory(year, ticker),
+    outcomeNotes: afterStory(year, ticker) ?? holdOutcomeNote(year, ticker),
   };
 }
 
@@ -78,7 +81,7 @@ function buildYearBoards(year: number): FullBoard[] {
     const slice = rows.slice(bandIndex * 10, bandIndex * 10 + 10);
     const candidates = slice
       .map((row, i) => toCandidate(row, year, band.rankStart + i))
-      .sort((a, b) => b.marketCap - a.marketCap)
+      .sort((a, b) => (b.marketCap ?? -1) - (a.marketCap ?? -1))
       .map((candidate, i) => ({
         ...candidate,
         marketCapRank: band.rankStart + i,
@@ -152,6 +155,7 @@ export function toPublicBoard(board: FullBoard): PublicBoard {
       netMargin: c.netMargin,
       peRatio: c.peRatio,
       trailingReturn: c.trailingReturn,
+      entrySharePrice: c.entrySharePrice,
     })),
   };
 }

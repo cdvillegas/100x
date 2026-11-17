@@ -9,6 +9,7 @@ import {
   hasPrivateFields,
   inPeriod,
   isPersonalBest,
+  LEADERBOARD_LIMIT,
   periodBounds,
   sanitizeLeaderboardPayload,
   scoreCompletedRun,
@@ -50,22 +51,33 @@ function blankSession(id: string): SessionRecord {
   };
 }
 
-test("daily and weekly windows use UTC Monday-Sunday", () => {
-  const wednesday = new Date("2026-09-09T15:00:00.000Z");
-  const daily = periodBounds("daily", wednesday);
-  assert.equal(daily.start?.toISOString(), "2026-09-09T00:00:00.000Z");
-  assert.equal(daily.end?.toISOString(), "2026-09-10T00:00:00.000Z");
+test("daily and weekly windows reset at Pacific midnight", () => {
+  const wednesdayMorning = new Date("2026-09-09T15:00:00.000Z");
+  const daily = periodBounds("daily", wednesdayMorning);
+  assert.equal(daily.start?.toISOString(), "2026-09-09T07:00:00.000Z");
+  assert.equal(daily.end?.toISOString(), "2026-09-10T07:00:00.000Z");
 
-  const weekly = periodBounds("weekly", wednesday);
-  assert.equal(weekly.start?.toISOString(), "2026-09-07T00:00:00.000Z");
-  assert.equal(weekly.end?.toISOString(), "2026-09-14T00:00:00.000Z");
+  const weekly = periodBounds("weekly", wednesdayMorning);
+  assert.equal(weekly.start?.toISOString(), "2026-09-07T07:00:00.000Z");
+  assert.equal(weekly.end?.toISOString(), "2026-09-14T07:00:00.000Z");
 
-  const sunday = new Date("2026-09-13T23:59:59.000Z");
-  const sundayWeek = periodBounds("weekly", sunday);
-  assert.equal(sundayWeek.start?.toISOString(), "2026-09-07T00:00:00.000Z");
+  const sundayEvening = new Date("2026-09-14T06:59:59.000Z");
+  const sundayWeek = periodBounds("weekly", sundayEvening);
+  assert.equal(sundayWeek.start?.toISOString(), "2026-09-07T07:00:00.000Z");
 
-  assert.equal(inPeriod(new Date("2026-09-09T01:00:00.000Z"), "daily", wednesday), true);
-  assert.equal(inPeriod(new Date("2026-09-10T00:00:00.000Z"), "daily", wednesday), false);
+  const fridayMorning = new Date("2026-09-11T17:57:00.000Z");
+  assert.equal(
+    inPeriod(new Date("2026-09-11T06:23:28.037Z"), "daily", fridayMorning),
+    false,
+  );
+  assert.equal(
+    inPeriod(new Date("2026-09-11T07:07:30.104Z"), "daily", fridayMorning),
+    true,
+  );
+  assert.equal(
+    inPeriod(new Date("2026-09-11T06:23:28.037Z"), "weekly", fridayMorning),
+    true,
+  );
 });
 
 test("equal scores share a rank while earlier finishes sort first", () => {
@@ -120,6 +132,26 @@ test("duplicate display names are allowed and your run stays pinned", () => {
   assert.equal(board.rows[1].name, "Ada");
   assert.equal(board.you?.rank, 2);
   assert.equal(board.you?.isYou, true);
+});
+
+test("public board is a fixed top ten, with your run pinned if you miss it", () => {
+  const entries = Array.from({ length: 12 }, (_, index) =>
+    entry(
+      `g${index + 1}`,
+      `p${index + 1}`,
+      (12 - index) * 10_000,
+      `2026-09-10T${String(10 + index).padStart(2, "0")}:00:00.000Z`,
+      `P${index + 1}`,
+    ),
+  );
+  const board = buildBoard(entries, "all", "p12", "g12");
+  assert.equal(LEADERBOARD_LIMIT, 10);
+  assert.equal(board.rows.length, 10);
+  assert.equal(board.rows.at(-1)?.rank, 10);
+  assert.equal(board.rows.some((row) => row.isYou), false);
+  assert.equal(board.you?.rank, 12);
+  assert.equal(board.placement?.topTen, false);
+  assert.equal(board.placement?.total, 12);
 });
 
 test("public leaderboard payloads never include picks", () => {

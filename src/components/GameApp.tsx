@@ -9,31 +9,26 @@ import {
 } from "react";
 import {
   createGame,
-  fetchLeaderboard,
   loadGame,
   pickGame,
-  renameLeaderboard,
   respinGame,
   revealGame,
   spinGame,
   submitLeaderboard,
 } from "@/lib/api";
-import { buySharesLabel, formatMultiplier } from "@/lib/format";
+import { buySharesLabel, formatMultiplier, formatSessionDate } from "@/lib/format";
 import { GUEST_NAME, isGuestName } from "@/lib/names";
 import { parseChallengeMultiplier, parseSharePath } from "@/lib/share";
 import { thenHeadlinesUrl } from "@/lib/then-news";
 import {
   PICK_STAKE,
   TARGET_BANKROLL,
-  type LeaderboardBoard,
-  type LeaderboardPlacement,
   type PublicCandidate,
   type PublicSession,
   type RevealPayload,
   type EraNote,
 } from "@/lib/types";
 import CompanyList from "./CompanyList";
-import EraChips from "./EraChips";
 import Leaderboard from "./Leaderboard";
 import Reels from "./Reels";
 import Reveal from "./Reveal";
@@ -112,13 +107,7 @@ function HelpIcon() {
   );
 }
 
-function ThenNewsLink({
-  entryDate,
-  year,
-}: {
-  entryDate: string;
-  year: number;
-}) {
+function ThenNewsLink({ entryDate }: { entryDate: string }) {
   return (
     <a
       href={thenHeadlinesUrl(entryDate)}
@@ -126,8 +115,7 @@ function ThenNewsLink({
       rel="noopener noreferrer"
       className="inline-flex shrink-0 items-center gap-1.5 text-muted hover:text-ink"
     >
-      <span className="eyebrow lg:hidden">VIEW HEADLINES</span>
-      <span className="eyebrow hidden lg:inline">HEADLINES FROM {year}</span>
+      <span className="eyebrow">VIEW HEADLINES</span>
       <ExternalIcon />
     </a>
   );
@@ -145,19 +133,17 @@ function WorldThen({
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="company-row mb-3 rounded-2xl px-3.5 py-3 sm:px-5 sm:py-4 lg:mb-4">
+    <div className="company-row mb-5 rounded-2xl px-4 py-4 sm:px-5 sm:py-4 lg:mb-6">
       <div className="flex items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-2">
-          <NewsIcon className="size-4 text-amber sm:size-5" />
-          <div className="eyebrow text-amber">
-            <span className="lg:hidden">{year} NEWS</span>
-            <span className="hidden lg:inline">{year} · THE WORLD THEN</span>
+          <NewsIcon className="size-4 text-muted sm:size-5" />
+          <div className="eyebrow text-muted">
+            {year} NEWS
           </div>
         </div>
-        <ThenNewsLink entryDate={entryDate} year={year} />
+        <ThenNewsLink entryDate={entryDate} />
       </div>
-      <EraChips chips={climate.chips ?? []} />
-      <div className="display mt-2 text-xl sm:mt-3 sm:text-2xl">{climate.kicker}</div>
+      <div className="display mt-3 text-xl sm:text-2xl">{climate.kicker}</div>
       <div className="relative mt-2">
         <p
           className={`text-[15px] leading-7 text-ink/80 ${
@@ -232,11 +218,8 @@ export default function GameApp() {
   const [bootError, setBootError] = useState<string | null>(null);
   const [approvedName, setApprovedName] = useState<string | null>(null);
   const [draftName, setDraftName] = useState("");
-  const [placements, setPlacements] = useState<LeaderboardPlacement[]>([]);
-  const [boardPreview, setBoardPreview] = useState<LeaderboardBoard | null>(null);
   const [personalBest, setPersonalBest] = useState(false);
   const [submittingBoard, setSubmittingBoard] = useState(false);
-  const [boardError, setBoardError] = useState<string | null>(null);
   const reducedMotion = useSyncExternalStore(
     subscribeToReducedMotion,
     getReducedMotion,
@@ -265,10 +248,7 @@ export default function GameApp() {
     setReveal(null);
     setRevealIndex(0);
     setSkipped(false);
-    setPlacements([]);
-    setBoardPreview(null);
     setPersonalBest(false);
-    setBoardError(null);
     setPhase("ready");
   }, []);
 
@@ -295,6 +275,7 @@ export default function GameApp() {
             setPhase(alreadyRevealed ? "results" : "revealing");
             const saved = localStorage.getItem(NAME_KEY);
             if (alreadyRevealed) {
+              setSubmittingBoard(true);
               void submitLeaderboard(
                 viewed.id,
                 saved && !isGuestName(saved) ? saved : GUEST_NAME,
@@ -305,14 +286,10 @@ export default function GameApp() {
                     setApprovedName(result.displayName);
                     setDraftName(result.displayName);
                   }
-                  setPlacements(result.placements);
-                  setBoardPreview(result.boards.daily);
                   setPersonalBest(result.personalBest);
                 })
-                .catch((err) => {
-                  setBoardError(
-                    err instanceof Error ? err.message : "Board unavailable",
-                  );
+                .finally(() => {
+                  if (!cancelled) setSubmittingBoard(false);
                 });
             }
           } else {
@@ -387,10 +364,7 @@ export default function GameApp() {
     setReveal(null);
     setRevealIndex(0);
     setSkipped(false);
-    setPlacements([]);
-    setBoardPreview(null);
     setPersonalBest(false);
-    setBoardError(null);
     try {
       const next = await createGame();
       localStorage.setItem(GAME_KEY, next.id);
@@ -454,7 +428,6 @@ export default function GameApp() {
     async (name: string) => {
       if (!session || submittingBoard) return;
       setSubmittingBoard(true);
-      setBoardError(null);
       try {
         const result = await submitLeaderboard(session.id, name);
         if (!isGuestName(result.displayName)) {
@@ -462,41 +435,15 @@ export default function GameApp() {
           setApprovedName(result.displayName);
           setDraftName(result.displayName);
         }
-        setPlacements(result.placements);
-        setBoardPreview(result.boards.daily);
         setPersonalBest(result.personalBest);
-      } catch (err) {
-        setBoardError(err instanceof Error ? err.message : "Board unavailable");
+      } catch {
+        // Leaderboard panel will surface an empty or stale board.
       } finally {
         setSubmittingBoard(false);
       }
     },
     [session, submittingBoard],
   );
-
-  const claimName = useCallback(async () => {
-    const name = draftName.trim();
-    if (name.length < 2 || !session) return;
-    if (placements.length === 0) {
-      await postToBoard(name);
-      return;
-    }
-    setSubmittingBoard(true);
-    setBoardError(null);
-    try {
-      const result = await renameLeaderboard(name);
-      localStorage.setItem(NAME_KEY, result.displayName);
-      setApprovedName(result.displayName);
-      setDraftName(result.displayName);
-      const next = await fetchLeaderboard("daily", session.id);
-      setBoardPreview(next.board);
-      setPlacements(next.placements);
-    } catch (err) {
-      setBoardError(err instanceof Error ? err.message : "Could not update name");
-    } finally {
-      setSubmittingBoard(false);
-    }
-  }, [draftName, placements.length, postToBoard, session]);
 
   const finishToResults = () => {
     setSkipped(true);
@@ -633,16 +580,16 @@ export default function GameApp() {
                   climate={board.climate}
                 />
               )}
-              <div className="mb-4 flex items-center gap-2">
-                <TrendUpIcon className="size-4 shrink-0 text-muted" />
-                <h2 className="text-sm font-medium leading-none text-muted">
-                  <span className="lg:hidden">
-                    {`Invest $${PICK_STAKE.toLocaleString()} in ${board.year}`}
-                  </span>
-                  <span className="hidden lg:inline">
+              <div className="mb-4 flex items-start gap-2.5 py-1">
+                <TrendUpIcon className="mt-0.5 size-4 shrink-0 text-muted" />
+                <div className="min-w-0">
+                  <h2 className="text-[15px] font-medium leading-6 text-ink/80">
                     {`Select a Stock Below to Invest $${PICK_STAKE.toLocaleString()} In ${board.year}`}
-                  </span>
-                </h2>
+                  </h2>
+                  <p className="row-meta mt-1 text-muted">
+                    {`Prices are the ${formatSessionDate(board.entryDate)} close, non split adjusted.`}
+                  </p>
+                </div>
               </div>
               <CompanyList
                 candidates={board.candidates}
@@ -672,7 +619,7 @@ export default function GameApp() {
               onClick={lock}
               className="pressable btn-lime w-full rounded-2xl py-4 text-base disabled:opacity-40"
             >
-              {buySharesLabel(selected.ticker, board.year, selected.marketCapRank)}
+              {buySharesLabel(selected.ticker, selected.entrySharePrice)}
             </button>
           </div>
         </div>
@@ -690,13 +637,12 @@ export default function GameApp() {
           index={revealIndex}
           skipped={skipped || phase === "results"}
           reducedMotion={reducedMotion}
-          placements={placements}
-          preview={boardPreview}
           personalBest={personalBest}
-          hasChosenName={Boolean(approvedName && !isGuestName(approvedName))}
-          draftName={draftName}
+          gameId={session.id}
+          approvedName={
+            approvedName && !isGuestName(approvedName) ? approvedName : null
+          }
           submitting={submittingBoard}
-          submitError={boardError}
           onAdvance={() => {
             setRevealIndex((current) => {
               const next = current + 1;
@@ -712,16 +658,11 @@ export default function GameApp() {
           onAgain={() => {
             void spinAgain();
           }}
-          onDraftName={setDraftName}
-          onSubmitName={() => {
-            void claimName();
+          onRenamed={(name) => {
+            setApprovedName(name);
+            setDraftName(name);
+            localStorage.setItem(NAME_KEY, name);
           }}
-          onRetry={() => {
-            void postToBoard(
-              approvedName && !isGuestName(approvedName) ? approvedName : GUEST_NAME,
-            );
-          }}
-          onOpenBoard={() => setShowBoard(true)}
         />
       )}
 

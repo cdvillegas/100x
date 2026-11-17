@@ -65,15 +65,14 @@ function nextRandom(session: SessionRecord): number {
 
 function pickBoard(
   session: SessionRecord,
-  filter: (board: (typeof BOARDS)[number]) => boolean,
+  prefer: (board: (typeof BOARDS)[number]) => boolean,
+  require: (board: (typeof BOARDS)[number]) => boolean = () => true,
 ) {
-  const pool = BOARDS.filter(
-    (board) => !session.usedBoardIds.includes(board.id) && filter(board),
+  const unused = BOARDS.filter(
+    (board) => !session.usedBoardIds.includes(board.id) && require(board),
   );
-  const fallback = BOARDS.filter(
-    (board) => !session.usedBoardIds.includes(board.id),
-  );
-  const options = pool.length > 0 ? pool : fallback;
+  const preferred = unused.filter(prefer);
+  const options = preferred.length > 0 ? preferred : unused;
   if (options.length === 0) {
     throw new Error("No remaining boards");
   }
@@ -94,6 +93,7 @@ function lockedPicks(session: SessionRecord): LockedPick[] {
       year: board.year,
       bandLabel: board.bandLabel,
       marketCapRank: candidate.marketCapRank,
+      entrySharePrice: candidate.entrySharePrice,
     };
   });
 }
@@ -174,10 +174,16 @@ export function respin(
     (id) => id !== current.id,
   );
 
-  const next = pickBoard(session, (board) =>
-    type === "year"
-      ? board.rankStart === current.rankStart && board.year !== current.year
-      : board.year === current.year && board.rankStart !== current.rankStart,
+  const next = pickBoard(
+    session,
+    (board) =>
+      type === "year"
+        ? board.rankStart === current.rankStart && board.year !== current.year
+        : board.year === current.year && board.rankStart !== current.rankStart,
+    (board) =>
+      type === "year"
+        ? board.year !== current.year
+        : board.rankStart !== current.rankStart,
   );
 
   session.currentBoardId = next.id;
@@ -246,6 +252,7 @@ export function reveal(session: SessionRecord): RevealPayload {
       year: board.year,
       bandLabel: board.bandLabel,
       marketCapRank: bestCandidate.marketCapRank,
+      entrySharePrice: bestCandidate.entrySharePrice,
       entryBankroll: PICK_STAKE,
       todayValue: positionToday(bestCandidate.forwardTotalReturn),
       forwardTotalReturn: bestCandidate.forwardTotalReturn,
@@ -259,6 +266,7 @@ export function reveal(session: SessionRecord): RevealPayload {
       year: board.year,
       bandLabel: board.bandLabel,
       marketCapRank: candidate.marketCapRank,
+      entrySharePrice: candidate.entrySharePrice,
       entryBankroll: PICK_STAKE,
       todayValue,
       exitBankroll: bankroll,

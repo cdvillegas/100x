@@ -1,6 +1,6 @@
 "use client";
 
-import { formatCompact, formatPct, formatSharePrice, modeledSharePrice } from "@/lib/format";
+import { formatCompact, formatPct, formatSharePrice } from "@/lib/format";
 import type { PublicCandidate } from "@/lib/types";
 import { InfoIcon } from "./icons";
 
@@ -72,13 +72,7 @@ export default function CompanyList({
                 <Stat
                   compact
                   label="PRICE"
-                  value={formatSharePrice(
-                    modeledSharePrice(
-                      company.ticker,
-                      company.year,
-                      company.marketCapRank,
-                    ),
-                  )}
+                  value={formatSharePrice(company.entrySharePrice)}
                 />
                 <Stat
                   compact
@@ -89,13 +83,7 @@ export default function CompanyList({
               <div className="hidden gap-5 sm:flex">
                 <Stat
                   label="PRICE"
-                  value={formatSharePrice(
-                    modeledSharePrice(
-                      company.ticker,
-                      company.year,
-                      company.marketCapRank,
-                    ),
-                  )}
+                  value={formatSharePrice(company.entrySharePrice)}
                 />
                 <Stat label="MCAP" value={formatCompact(company.marketCap)} />
                 <Stat label="YOY" value={formatPct(company.revenueGrowth, 0)} />

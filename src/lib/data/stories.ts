@@ -3,6 +3,8 @@ import {
   companyAfterStory,
   companyThenStory,
 } from "./company-stories";
+import { resolveFirm } from "./fixtures";
+import { holdReturn } from "./hold-returns";
 import { sectorOf } from "./sectors";
 
 export interface EraClimate {
@@ -449,14 +451,20 @@ export function generatedAfter(year: number, name: string, multiple: number): st
 }
 
 export function thenStory(year: number, ticker: string): string {
-  return companyThenStory(year, ticker);
+  return (
+    companyThenStory(year, ticker) ??
+    sectorThen(year, ticker, resolveFirm(ticker, year).name)
+  );
 }
 
 export function afterStory(
   year: number,
   ticker: string,
 ): string {
-  return companyAfterStory(year, ticker);
+  return (
+    companyAfterStory(year, ticker) ??
+    generatedAfter(year, resolveFirm(ticker, year).name, 1 + holdReturn(year, ticker))
+  );
 }
 
 export function yearClimate(year: number): EraClimate {

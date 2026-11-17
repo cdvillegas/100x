@@ -18,15 +18,8 @@ function baseTicker(ticker: string): string {
   return ticker.replace(/2$/, "");
 }
 
-function profileFor(
-  ticker: string,
-): CompanyStoryProfile {
-  const normalized = baseTicker(ticker);
-  const profile = COMPANY_STORIES[normalized];
-  if (!profile) {
-    throw new Error(`Missing historical story profile for ${normalized}`);
-  }
-  return profile;
+function profileFor(ticker: string): CompanyStoryProfile | null {
+  return COMPANY_STORIES[baseTicker(ticker)] ?? null;
 }
 
 function latestKnownMoment(
@@ -45,20 +38,18 @@ function distinct(values: readonly string[]): string[] {
 export function companyThenStory(
   year: number,
   ticker: string,
-): string {
+): string | null {
   const profile = profileFor(ticker);
-  const moment = latestKnownMoment(profile.moments, year);
-  if (!moment) {
-    throw new Error(`No ${year} pre-pick story for ${baseTicker(ticker)}`);
-  }
-  return moment.then;
+  if (!profile) return null;
+  return latestKnownMoment(profile.moments, year)?.then ?? null;
 }
 
 export function companyAfterStory(
   year: number,
   ticker: string,
-): string {
+): string | null {
   const profile = profileFor(ticker);
+  if (!profile) return null;
   const later = distinct(
     profile.moments
       .filter((moment) => moment.year > year)

@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "tsx --test src/lib/*.test.ts"
+    "test": "tsx --test src/lib/*.test.ts",
+    "quotes": "python3 scripts/refresh-hold-quotes.py",
+    "fundamentals": "python3 scripts/refresh-fundamentals.py"
   },
   "dependencies": {
     "next": "16.3.4",

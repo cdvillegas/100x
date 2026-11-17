@@ -1,16 +1,14 @@
 import { FIRMS } from "./catalog";
 
 /**
- * Manually curated seeds for Phase 1. Each year contains 20 approximate
- * large-company records; universe.ts models the remaining 80. Rankings,
- * fundamentals, and returns are gameplay estimates, not a market-data feed.
- *
- * Tuple: ticker, mcapB, revenueB, growthPct, marginPct|null, pe|null, trailPct, unusedFwdPct
- * Forward payoff is a modeled hold-to-today value from hold-returns.ts.
+ * Seed tickers for each board year. The first ~20 names are the historical
+ * megacaps we always want in the 100; universe.ts fills the rest from the
+ * catalog. Card financials come from fundamentals.json (FMP), not these
+ * numeric columns. Hold payoff is hold-quotes.json.
  */
 export type RawRow = [
   ticker: string,
-  mcapB: number,
+  mcapB: number | null,
   revenueB: number | null,
   growthPct: number | null,
   marginPct: number | null,

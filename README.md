@@ -1,20 +1,42 @@
-# 10X
+# 100X
 
-Pick five stocks from the past. Turn $10K into $1M.
+**Pick five stocks from the past. Turn $10K into $1M.**
 
-This is a playable Phase 1 of the 10X game: spin a year and an estimated
-market-cap band, lock one of ten companies, repeat five times, then reveal
-modeled hold-to-today values.
+### [▶ Play now at 100x.chrisvillegas.com](https://100x.chrisvillegas.com)
+
+---
+
+## How it works
+
+1. **Spin** — a wheel lands on a historical year and a market-cap band
+2. **Pick** — choose one company from ten, using only info available at the time
+3. **Repeat** — five picks, $2,000 each
+4. **Reveal** — see how your picks performed and whether you hit **$1,000,000**
+
+A full round takes about two minutes. Fast, replayable, and surprisingly hard.
+
+## Features
+
+- 🎰 &nbsp; Dual spin wheels — year + market-cap rank band
+- 📰 &nbsp; Era-accurate news headlines for historical context
+- 📊 &nbsp; Real historical price data and fundamentals
+- 🏆 &nbsp; Daily, weekly, and all-time leaderboards
+- 🔗 &nbsp; Shareable result cards with dynamic OG images
+- 📱 &nbsp; Mobile-first, responsive design
+
+## Tech stack
+
+[Next.js](https://nextjs.org) 16 &bull; React 19 &bull; [Tailwind CSS](https://tailwindcss.com) 4 &bull; PostgreSQL &bull; Vercel
+
+## Local development
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open [localhost:3000](http://localhost:3000).
 
-Phase 1 combines 20 manually curated estimates per year with deterministic
-modeled records for the rest of each 100-company board. Financials, ranks, and
-hold values are gameplay estimates—not licensed quotes, audited point-in-time
-fundamentals, or verified total-return series. Historical prose is anchored to
-the entry date. Modeled values stay on the server until the final reveal.
+## Disclaimer
+
+This is entertainment, not financial advice. Financials, ranks, and hold values are gameplay estimates — not licensed quotes, audited fundamentals, or verified total-return series.

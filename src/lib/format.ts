@@ -39,37 +39,29 @@ export function formatMultiplier(value: number): string {
   return `${Math.round(value)}X`;
 }
 
+export function formatSessionDate(iso: string): string {
+  const parts = iso.split("-").map(Number);
+  const date = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]));
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+}
+
 export function formatHoldReturn(totalReturn: number): string {
   const multiple = 1 + totalReturn;
-  if (multiple <= 0) return "0X";
-  return formatMultiplier(multiple);
+  return multiple <= 0 ? "0X" : formatMultiplier(multiple);
 }
 
-export function modeledSharePrice(
-  ticker: string,
-  year: number,
-  marketCapRank: number,
-) {
-  let hash = 2166136261;
-  const key = `${ticker.toUpperCase()}:${year}`;
-  for (let i = 0; i < key.length; i++) {
-    hash ^= key.charCodeAt(i);
-    hash = Math.imul(hash, 16777619);
-  }
-  const jitter = 10 + (hash % 80);
-  const sizeBias = Math.max(6, 90 - marketCapRank);
-  return Math.max(8, Math.round(((jitter + sizeBias) / 2) * 100) / 100);
-}
-
-export function modeledShareCount(
-  ticker: string,
-  year: number,
-  marketCapRank: number,
-) {
-  return Math.max(
-    1,
-    Math.round(PICK_STAKE / modeledSharePrice(ticker, year, marketCapRank)),
-  );
+export function modeledShareCount(sharePrice: number) {
+  if (sharePrice <= 0) return 0;
+  const count = PICK_STAKE / sharePrice;
+  if (count >= 100) return Math.round(count);
+  if (count >= 10) return Math.round(count * 10) / 10;
+  if (count >= 1) return Math.round(count * 100) / 100;
+  return Math.round(count * 10_000) / 10_000;
 }
 
 export function formatSharePrice(value: number) {
@@ -81,13 +73,12 @@ export function formatSharePrice(value: number) {
   }).format(value);
 }
 
-export function buySharesLabel(
-  ticker: string,
-  year: number,
-  marketCapRank: number,
-) {
-  const count = modeledShareCount(ticker, year, marketCapRank);
-  return `BUY ${count.toLocaleString()} SHARES OF ${ticker}`;
+export function buySharesLabel(ticker: string, sharePrice: number) {
+  const count = modeledShareCount(sharePrice);
+  const shares = Number.isInteger(count)
+    ? count.toLocaleString()
+    : count.toLocaleString(undefined, { maximumFractionDigits: 4 });
+  return `BUY ${shares} SHARES OF ${ticker}`;
 }
 
 export function formatPe(value: number | null): string {

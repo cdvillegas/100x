@@ -60,12 +60,13 @@ export interface PublicCandidate {
   sectorLabel: string;
   sectorContext: string;
   marketCapRank: number;
-  marketCap: number;
+  marketCap: number | null;
   revenue: number | null;
   revenueGrowth: number | null;
   netMargin: number | null;
   peRatio: number | null;
   trailingReturn: number | null;
+  entrySharePrice: number;
 }
 
 export type EraMood =
@@ -111,6 +112,7 @@ export interface LockedPick {
   year: number;
   bandLabel: string;
   marketCapRank: number;
+  entrySharePrice: number;
 }
 
 export interface RevealedPick extends LockedPick {

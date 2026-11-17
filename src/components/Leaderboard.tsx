@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { fetchLeaderboard, renameLeaderboard } from "@/lib/api";
-import { formatMoney, formatMultiplier } from "@/lib/format";
+import { formatMultiplier } from "@/lib/format";
 import type {
   LeaderboardBoard,
   LeaderboardPeriod,
   LeaderboardRow,
 } from "@/lib/types";
+import { SheetHeading } from "./Sheets";
 
 const TABS: { id: LeaderboardPeriod; label: string }[] = [
   { id: "daily", label: "DAILY" },
@@ -15,10 +16,16 @@ const TABS: { id: LeaderboardPeriod; label: string }[] = [
   { id: "all", label: "ALL TIME" },
 ];
 
+const RANK_LABEL: Record<LeaderboardPeriod, string> = {
+  daily: "DAILY RANK",
+  weekly: "WEEKLY RANK",
+  all: "ALL TIME RANK",
+};
+
 function Row({ row }: { row: LeaderboardRow }) {
   return (
     <div
-      className={`flex items-center justify-between gap-4 border-b border-white/10 py-3.5 last:border-0 ${
+      className={`flex items-center justify-between gap-3 border-b border-white/10 py-3 last:border-0 ${
         row.isYou ? "text-lime" : ""
       }`}
     >
@@ -37,26 +44,25 @@ function Row({ row }: { row: LeaderboardRow }) {
           </span>
         ) : null}
       </div>
-      <div className="shrink-0 text-right">
-        <div className="display text-xl tracking-tight">
-          {formatMultiplier(row.multiplier)}
-        </div>
-        <div className="stat-label mt-0.5">{formatMoney(row.bankroll)}</div>
+      <div className="display shrink-0 text-xl tracking-tight">
+        {formatMultiplier(row.multiplier)}
       </div>
     </div>
   );
 }
 
-export default function Leaderboard({
+export function LeaderboardPanel({
   gameId,
   approvedName,
-  onClose,
   onRenamed,
+  showRank = false,
+  hold = false,
 }: {
   gameId?: string;
   approvedName: string | null;
-  onClose: () => void;
   onRenamed: (name: string) => void;
+  showRank?: boolean;
+  hold?: boolean;
 }) {
   const [period, setPeriod] = useState<LeaderboardPeriod>("daily");
   const [board, setBoard] = useState<LeaderboardBoard | null>(null);
@@ -66,6 +72,11 @@ export default function Leaderboard({
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
+    if (approvedName && !editing) setDraft(approvedName);
+  }, [approvedName, editing]);
+
+  useEffect(() => {
+    if (hold) return;
     let cancelled = false;
     fetchLeaderboard(period, gameId)
       .then((result) => {
@@ -83,7 +94,7 @@ export default function Leaderboard({
     return () => {
       cancelled = true;
     };
-  }, [period, gameId]);
+  }, [period, gameId, hold]);
 
   const rename = async () => {
     setBusy(true);
@@ -103,7 +114,129 @@ export default function Leaderboard({
 
   const pinned =
     board?.you && !board.rows.some((row) => row.isYou) ? board.you : null;
+  const rank = board?.you?.rank ?? board?.placement?.rank;
 
+  return (
+    <>
+      {showRank ? (
+        rank ? (
+          <div>
+            <div className="eyebrow text-muted">{RANK_LABEL[period]}</div>
+            <div className="display mt-1 text-4xl text-lime">#{rank}</div>
+          </div>
+        ) : (
+          <p className="text-sm text-muted">
+            {hold ? "Saving…" : error ?? "Loading…"}
+          </p>
+        )
+      ) : null}
+
+      <div className="mt-4 grid grid-cols-3 gap-2">
+        {TABS.map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => setPeriod(tab.id)}
+            className={`rounded-2xl px-3 py-2.5 text-xs font-bold tracking-[0.12em] outline-none ${
+              period === tab.id
+                ? "border border-lime/30 bg-lime/[0.045] text-lime"
+                : "border border-white/14 text-muted"
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="mt-4 overflow-hidden rounded-2xl border border-white/10">
+        <div className="px-4">
+          {error && !board ? (
+            <p className="py-8 text-center text-sm text-muted">{error}</p>
+          ) : !board ? (
+            <p className="py-8 text-center text-sm text-muted">Loading…</p>
+          ) : board.rows.length === 0 ? (
+            <p className="py-8 text-center text-sm text-muted">No runs yet.</p>
+          ) : (
+            board.rows.map((row) => (
+              <Row key={`${row.rank}-${row.name}-${row.completedAt}`} row={row} />
+            ))
+          )}
+        </div>
+        {period !== "all" ? (
+          <p className="border-t border-white/10 px-4 py-3 text-xs text-muted">
+            {period === "weekly"
+              ? "Resets Monday at midnight Pacific."
+              : "Resets at midnight Pacific."}
+          </p>
+        ) : null}
+      </div>
+
+      {pinned ? (
+        <div className="mt-4 rounded-2xl border border-lime/30 bg-lime/[0.04] px-4">
+          <div className="eyebrow pt-3 text-lime">YOUR RUN</div>
+          <Row row={pinned} />
+        </div>
+      ) : null}
+
+      <form
+        className="mt-6 border-t border-white/10 pt-5"
+        onSubmit={(event) => {
+          event.preventDefault();
+          if (!approvedName || editing) void rename();
+        }}
+      >
+        <div className="eyebrow text-muted">NAME</div>
+        {approvedName && !editing ? (
+          <button
+            type="button"
+            className="mt-2 flex w-full items-center justify-between gap-3 rounded-2xl border border-white/10 px-4 py-3 text-left"
+            onClick={() => {
+              setDraft(approvedName);
+              setEditing(true);
+            }}
+          >
+            <span className="display truncate text-xl">{approvedName}</span>
+            <span className="eyebrow shrink-0 text-muted">EDIT</span>
+          </button>
+        ) : (
+          <div className="mt-2 flex gap-2">
+            <input
+              value={draft}
+              onChange={(event) => setDraft(event.target.value)}
+              maxLength={20}
+              autoComplete="nickname"
+              autoFocus={editing}
+              className="display min-w-0 flex-1 rounded-2xl border border-white/10 bg-bg px-4 py-3 text-xl text-ink outline-none"
+              placeholder="Name"
+            />
+            <button
+              type="submit"
+              disabled={busy || draft.trim().length < 2}
+              className="pressable shrink-0 rounded-2xl border border-white/10 px-4 py-3 text-xs font-bold tracking-[0.14em] text-ink disabled:opacity-40"
+            >
+              {busy ? "SAVING" : "SAVE"}
+            </button>
+          </div>
+        )}
+        {error && board ? (
+          <p className="mt-2 text-sm text-coral">{error}</p>
+        ) : null}
+      </form>
+    </>
+  );
+}
+
+export default function Leaderboard({
+  gameId,
+  approvedName,
+  onClose,
+  onRenamed,
+}: {
+  gameId?: string;
+  approvedName: string | null;
+  onClose: () => void;
+  onRenamed: (name: string) => void;
+}) {
   return (
     <div className="sheet-scrim fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-bg px-4 py-4 sm:py-8">
       <button
@@ -112,101 +245,13 @@ export default function Leaderboard({
         aria-label="Close"
         onClick={onClose}
       />
-      <div className="relative z-10 my-auto w-full max-w-xl shrink-0 rounded-[32px] border border-white/10 bg-surface p-6 sm:p-9">
-        <div className="text-center">
-          <div className="display text-5xl tracking-tight">
-            100<span className="text-lime glow-text">X</span>
-          </div>
-          <p className="eyebrow mt-3 text-muted">LEADERBOARD</p>
-        </div>
-
-        <div className="mt-8 grid grid-cols-3 gap-2">
-          {TABS.map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setPeriod(tab.id)}
-              className={`rounded-2xl px-3 py-2.5 text-xs font-bold tracking-[0.12em] ${
-                period === tab.id
-                  ? "border border-lime/30 bg-lime/[0.045] text-lime"
-                  : "border border-white/14 text-muted"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
-        <div className="mt-5 rounded-2xl border border-white/10 px-4">
-          {error && !board ? (
-            <p className="py-8 text-center text-sm text-muted">{error}</p>
-          ) : !board ? (
-            <p className="py-8 text-center text-sm text-muted">Loading…</p>
-          ) : board.rows.length === 0 ? (
-            <p className="py-8 text-center text-sm text-muted">
-              No runs yet.
-            </p>
-          ) : (
-            board.rows.map((row) => (
-              <Row key={`${row.rank}-${row.name}-${row.completedAt}`} row={row} />
-            ))
-          )}
-        </div>
-
-        {pinned ? (
-          <div className="mt-4 rounded-2xl border border-lime/30 bg-lime/[0.04] px-4">
-            <div className="eyebrow pt-3 text-lime">
-              YOUR RUN
-            </div>
-            <Row row={pinned} />
-          </div>
-        ) : null}
-
-        <form
-          className="mt-8 border-t border-white/10 pt-5"
-          onSubmit={(event) => {
-            event.preventDefault();
-            if (!approvedName || editing) void rename();
-          }}
-        >
-          <div className="eyebrow text-muted">NAME</div>
-          {approvedName && !editing ? (
-            <button
-              type="button"
-              className="mt-2 flex w-full items-center justify-between gap-3 rounded-2xl border border-white/10 px-4 py-3 text-left"
-              onClick={() => {
-                setDraft(approvedName);
-                setEditing(true);
-              }}
-            >
-              <span className="display truncate text-xl">{approvedName}</span>
-              <span className="eyebrow shrink-0 text-muted">EDIT</span>
-            </button>
-          ) : (
-            <div className="mt-2 flex gap-2">
-              <input
-                value={draft}
-                onChange={(event) => setDraft(event.target.value)}
-                maxLength={20}
-                autoComplete="nickname"
-                autoFocus={editing}
-                className="min-w-0 flex-1 rounded-2xl border border-white/10 bg-bg px-4 py-3 text-ink outline-none"
-                placeholder="Name"
-              />
-              <button
-                type="submit"
-                disabled={busy || draft.trim().length < 2}
-                className="pressable shrink-0 rounded-2xl border border-white/10 px-4 py-3 text-xs font-bold tracking-[0.14em] text-ink disabled:opacity-40"
-              >
-                {busy ? "SAVING" : "SAVE"}
-              </button>
-            </div>
-          )}
-          {error && board ? (
-            <p className="mt-2 text-sm text-coral">{error}</p>
-          ) : null}
-        </form>
-
+      <div className="relative z-10 my-auto w-full max-w-xl shrink-0 rounded-[28px] border border-white/10 bg-surface p-5 sm:p-6">
+        <SheetHeading title="LEADERBOARD" />
+        <LeaderboardPanel
+          gameId={gameId}
+          approvedName={approvedName}
+          onRenamed={onRenamed}
+        />
         <button
           type="button"
           className="pressable btn-quiet mt-6 flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-base"

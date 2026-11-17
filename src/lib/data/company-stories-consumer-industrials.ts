@@ -763,6 +763,35 @@ export const CONSUMER_INDUSTRIAL_STORIES: Record<
       "Through 2024, CSX improved service metrics, invested in terminals and track, expanded rail-served industrial projects, and managed the Baltimore bridge disruption while labor and regulatory scrutiny remained elevated.",
   },
 
+  NSC: {
+    stakes:
+      "Norfolk Southern's eastern rail network was hard to copy, but service, labor, regulation, hazardous-materials risk, and the pressure to run a leaner railroad decided whether the franchise compounded or stumbled.",
+    moments: [
+      {
+        year: 2000,
+        then: "Norfolk Southern is digesting its share of Conrail, combining coal, merchandise, and intermodal traffic across the eastern United States while integration snarls have damaged service and customer confidence.",
+        after: "Norfolk Southern and CSX had split Conrail's operations in 1999, creating a multi-year service and systems integration problem.",
+      },
+      {
+        year: 2009,
+        then: "Coal, autos, and factory shipments have dropped with the recession, but a fixed rail network still needs volume, pricing discipline, and fuel recovery to cover its costs.",
+        after: "Norfolk Southern had raised efficiency and pricing before freight volumes collapsed in the 2008–09 downturn.",
+      },
+      {
+        year: 2016,
+        then: "The company is defending an independent strategy after rejecting Canadian Pacific's takeover approach, while precision-railroading ideas from peers raise the question of how far to cut crews and yards.",
+        after: "Norfolk Southern had rejected Canadian Pacific's 2015–16 takeover bid and remained an independent eastern railroad.",
+      },
+      {
+        year: 2023,
+        then: "Alan Shaw is pushing a safer, more balanced operating model after years of precision-scheduled-railroading pressure, while coal, autos, and intermodal still share a dense eastern network.",
+        after: "A Norfolk Southern train derailed in East Palestine, Ohio, on February 3, 2023, triggering a national safety and regulatory response.",
+      },
+    ],
+    recentArc:
+      "Through 2024, Norfolk Southern faced ongoing East Palestine litigation and regulatory oversight, changed operating practices, and remained a core eastern coal, merchandise, and intermodal carrier.",
+  },
+
   DE: {
     stakes:
       "Deere's dealer network and green equipment commanded loyalty, but farm income, crop prices, replacement cycles, and the shift from mechanical machines to software-governed precision systems drove demand.",

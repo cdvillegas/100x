@@ -9,15 +9,14 @@ import {
 } from "@/lib/format";
 import type {
   BestPossiblePick,
-  LeaderboardBoard,
-  LeaderboardPlacement,
-  LeaderboardRow,
   RevealPayload,
   RevealedPick,
 } from "@/lib/types";
 import { STARTING_BANKROLL } from "@/lib/types";
 import { shareResults } from "@/lib/share";
-import { DiceIcon, ShareIcon } from "./icons";
+import { DiceIcon, PartyPopperIcon, ShareIcon } from "./icons";
+import { LeaderboardPanel } from "./Leaderboard";
+import { SheetHeading } from "./Sheets";
 import Confetti from "./Confetti";
 
 function CountUp({
@@ -54,17 +53,13 @@ function CountUp({
 }
 
 function PersonalBestLabel({ reducedMotion }: { reducedMotion: boolean }) {
-  if (reducedMotion) {
-    return <div className="eyebrow text-lime">PERSONAL BEST</div>;
-  }
-
   return (
-    <div className="eyebrow personal-best" aria-label="Personal best">
-      {Array.from("PERSONAL BEST").map((letter, index) => (
-        <span key={`${letter}-${index}`} style={{ animationDelay: `${index * 38}ms` }}>
-          {letter === " " ? "\u00a0" : letter}
-        </span>
-      ))}
+    <div
+      className={`personal-best ${reducedMotion ? "" : "personal-best-live"}`}
+      aria-label="Personal best"
+    >
+      <PartyPopperIcon className="size-3.5" />
+      <span className="personal-best-text">PERSONAL BEST</span>
     </div>
   );
 }
@@ -178,207 +173,32 @@ function BestPossibleRow({ pick }: { pick: BestPossiblePick }) {
   );
 }
 
-function periodLabel(period: LeaderboardPlacement["period"]) {
-  if (period === "daily") return "Daily";
-  if (period === "weekly") return "Weekly";
-  return "All Time";
-}
-
-function MiniRow({ row }: { row: LeaderboardRow }) {
-  return (
-    <div
-      className={`flex items-center justify-between gap-4 border-b border-white/10 py-3.5 last:border-0 ${
-        row.isYou ? "text-lime" : ""
-      }`}
-    >
-      <div className="flex min-w-0 items-center gap-3">
-        <span
-          className={`display w-10 shrink-0 text-lg leading-none ${
-            row.isYou ? "" : "text-muted"
-          }`}
-        >
-          #{row.rank}
-        </span>
-        <span className="row-name truncate">{row.name}</span>
-      </div>
-      <div className="shrink-0 text-right">
-        <div className="display text-xl tracking-tight">
-          {formatMultiplier(row.multiplier)}
-        </div>
-        <div className="stat-label mt-0.5">{formatMoney(row.bankroll)}</div>
-      </div>
-    </div>
-  );
-}
-
-function PlacementCard({
-  placements,
-  preview,
-  hasChosenName,
-  draftName,
-  submitting,
-  error,
-  onDraftName,
-  onSubmitName,
-  onRetry,
-  onOpenBoard,
-}: {
-  placements: LeaderboardPlacement[];
-  preview: LeaderboardBoard | null;
-  hasChosenName: boolean;
-  draftName: string;
-  submitting: boolean;
-  error: string | null;
-  onDraftName: (value: string) => void;
-  onSubmitName: () => void;
-  onRetry: () => void;
-  onOpenBoard: () => void;
-}) {
-  const highlight =
-    placements.find((item) => item.first) ??
-    placements.find((item) => item.topTen) ??
-    placements[0] ??
-    preview?.placement ??
-    null;
-  const you = preview?.you;
-  const rank = you?.rank ?? highlight?.rank;
-  const rows = preview?.rows.slice(0, 8) ?? [];
-
-  return (
-    <div className="company-row mt-6 rounded-2xl px-4 py-4 sm:px-5">
-      <div className="eyebrow text-muted">LEADERBOARD</div>
-      {rank ? (
-        <div className="mt-4 grid grid-cols-2 items-start">
-          <div>
-            <div className="eyebrow text-muted">RANK</div>
-            <div className="display mt-1 text-4xl text-lime">
-              #{rank}
-            </div>
-          </div>
-          <div className="text-right">
-            <div className="eyebrow text-muted">
-              {highlight ? periodLabel(highlight.period).toUpperCase() : "DAILY"}
-            </div>
-            <div className="display mt-1 text-3xl tabular">
-              {highlight ? highlight.total : "—"}
-            </div>
-            <div className="stat-label mt-1">runs</div>
-          </div>
-        </div>
-      ) : (
-        <p className="mt-3 text-sm text-muted">
-          {submitting ? "Saving…" : (error ?? "Loading…")}
-        </p>
-      )}
-
-      {placements.length > 1 ? (
-        <p className="mt-3 text-xs text-muted">
-          {placements
-            .map((item) => `#${item.rank} ${periodLabel(item.period)}`)
-            .join(" · ")}
-        </p>
-      ) : null}
-
-      {rows.length > 0 ? (
-        <div className="mt-4 border-t border-white/10">
-          {rows.map((row) => (
-            <MiniRow
-              key={`${row.rank}-${row.name}-${row.completedAt}`}
-              row={row}
-            />
-          ))}
-        </div>
-      ) : null}
-
-      {error && !rank ? (
-        <button
-          type="button"
-          className="eyebrow mt-3 text-lime"
-          onClick={onRetry}
-        >
-          RETRY
-        </button>
-      ) : null}
-
-      {!hasChosenName && rank ? (
-        <form
-          className="mt-5 border-t border-white/10 pt-5"
-          onSubmit={(event) => {
-            event.preventDefault();
-            onSubmitName();
-          }}
-        >
-          <div className="eyebrow text-muted">NAME</div>
-          <div className="mt-2 flex gap-2">
-            <input
-              value={draftName}
-              onChange={(event) => onDraftName(event.target.value)}
-              maxLength={20}
-              autoComplete="nickname"
-              placeholder="Name"
-              className="min-w-0 flex-1 rounded-2xl border border-white/10 bg-bg px-4 py-3 text-ink outline-none"
-            />
-            <button
-              type="submit"
-              disabled={submitting || draftName.trim().length < 2}
-              className="pressable shrink-0 rounded-2xl border border-white/10 px-4 py-3 text-xs font-bold tracking-[0.14em] text-ink disabled:opacity-40"
-            >
-              {submitting ? "SAVING" : "SAVE"}
-            </button>
-          </div>
-          {error ? <p className="mt-2 text-sm text-coral">{error}</p> : null}
-        </form>
-      ) : null}
-
-      <button
-        type="button"
-        className="pressable btn-quiet mt-5 w-full rounded-2xl py-4 text-base"
-        onClick={onOpenBoard}
-      >
-        LEADERBOARD
-      </button>
-    </div>
-  );
-}
-
 export default function Reveal({
   payload,
   index,
   skipped,
   reducedMotion,
-  placements,
-  preview,
   personalBest,
-  hasChosenName,
-  draftName,
+  gameId,
+  approvedName,
   submitting,
-  submitError,
   onAdvance,
   onSkip,
   onAgain,
-  onDraftName,
-  onSubmitName,
-  onRetry,
-  onOpenBoard,
+  onRenamed,
 }: {
   payload: RevealPayload;
   index: number;
   skipped: boolean;
   reducedMotion: boolean;
-  placements: LeaderboardPlacement[];
-  preview: LeaderboardBoard | null;
   personalBest: boolean;
-  hasChosenName: boolean;
-  draftName: string;
+  gameId: string;
+  approvedName: string | null;
   submitting: boolean;
-  submitError: string | null;
   onAdvance: () => void;
   onSkip: () => void;
   onAgain: () => void;
-  onDraftName: (value: string) => void;
-  onSubmitName: () => void;
-  onRetry: () => void;
-  onOpenBoard: () => void;
+  onRenamed: (name: string) => void;
 }) {
   const done = skipped || index >= payload.picks.length;
   const runningTotal =
@@ -405,17 +225,14 @@ export default function Reveal({
     <div className="fixed inset-0 z-40 overflow-y-auto bg-bg/96 px-4 py-6">
       <Confetti active={done && personalBest && !reducedMotion} />
       <div className={`mx-auto min-h-full max-w-xl ${done ? "pb-28 sm:pb-24" : ""}`}>
-        <div className="relative mb-6 text-center">
-          <div className="display text-5xl tracking-tight">
-            100<span className="text-lime glow-text">X</span>
-          </div>
-          <p className="eyebrow mt-3 text-muted">RESULTS</p>
+        <div className="relative mb-6 flex items-baseline justify-between gap-3">
+          <SheetHeading title="RESULTS" />
           <button
             type="button"
             onClick={onSkip}
             disabled={done}
             aria-hidden={done}
-            className={`eyebrow absolute right-0 top-2 text-muted ${
+            className={`eyebrow shrink-0 text-muted ${
               done ? "invisible pointer-events-none" : ""
             }`}
           >
@@ -471,18 +288,15 @@ export default function Reveal({
 
         {done ? (
           <div className="rise-in">
-            <PlacementCard
-              placements={placements}
-              preview={preview}
-              hasChosenName={hasChosenName}
-              draftName={draftName}
-              submitting={submitting}
-              error={submitError}
-              onDraftName={onDraftName}
-              onSubmitName={onSubmitName}
-              onRetry={onRetry}
-              onOpenBoard={onOpenBoard}
-            />
+            <div className="company-row mt-6 rounded-2xl px-4 py-4 sm:px-5">
+              <LeaderboardPanel
+                gameId={gameId}
+                approvedName={approvedName}
+                onRenamed={onRenamed}
+                showRank
+                hold={submitting}
+              />
+            </div>
             <div className="company-row mt-6 rounded-2xl px-4 py-4 sm:px-5">
               <div
                 className={`eyebrow ${
@@ -499,13 +313,15 @@ export default function Reveal({
               </div>
               <div className="mt-4 grid grid-cols-2 items-start border-t border-white/10 pt-5">
                 <div>
-                  <div className="eyebrow text-muted">BEST TOTAL</div>
+                  <div className="eyebrow text-muted">BEST POSSIBLE</div>
                   <div
                     className={`hero-money mt-1 ${
                       bestPickCount === 5 ? "text-lime" : ""
                     }`}
                   >
-                    {formatMoney(payload.oracleBankroll)}
+                    {formatMultiplier(
+                      payload.oracleBankroll / STARTING_BANKROLL,
+                    )}
                   </div>
                 </div>
                 <div className="text-right">

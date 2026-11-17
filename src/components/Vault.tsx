@@ -6,7 +6,7 @@ import {
   TARGET_BANKROLL,
   type LockedPick,
 } from "@/lib/types";
-import { formatMoney, formatSharePrice, modeledShareCount, modeledSharePrice } from "@/lib/format";
+import { formatMoney, formatSharePrice, modeledShareCount } from "@/lib/format";
 
 function Stat({
   label,
@@ -34,12 +34,8 @@ function Slot({
   index: number;
   pick: LockedPick | undefined;
 }) {
-  const shares = pick
-    ? modeledShareCount(pick.ticker, pick.year, pick.marketCapRank)
-    : null;
-  const price = pick
-    ? modeledSharePrice(pick.ticker, pick.year, pick.marketCapRank)
-    : null;
+  const shares = pick ? modeledShareCount(pick.entrySharePrice) : null;
+  const price = pick ? pick.entrySharePrice : null;
 
   if (pick && shares !== null) {
     return (
@@ -84,9 +80,6 @@ export default function Vault({
       <div className="flex items-center gap-2">
         {Array.from({ length: 5 }, (_, i) => {
           const pick = picks[i];
-          const shares = pick
-            ? modeledShareCount(pick.ticker, pick.year, pick.marketCapRank)
-            : null;
           return (
             <div
               key={i}
@@ -96,17 +89,15 @@ export default function Vault({
                   : "border border-dashed border-white/18 text-muted"
               }`}
               aria-label={
-                pick && shares !== null
-                  ? `${shares} shares of ${pick.ticker}`
+                pick
+                  ? `${pick.ticker} purchased ${pick.year}`
                   : `Lot ${i + 1} open`
               }
             >
-              {pick && shares !== null ? (
+              {pick ? (
                 <>
                   <span className="text-sm font-bold text-lime">{pick.ticker}</span>
-                  <span className="stat-label mt-0.5">
-                    {shares.toLocaleString()} SH
-                  </span>
+                  <span className="stat-label mt-0.5">{pick.year}</span>
                 </>
               ) : (
                 <span className="text-sm font-bold">

@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { formatCompact, formatMoney, formatPct, formatPe } from "@/lib/format";
+import { formatCompact, formatMoney, formatPct, formatPe, formatSharePrice } from "@/lib/format";
 import { STARTING_BANKROLL, TARGET_BANKROLL, type PublicCandidate } from "@/lib/types";
 import { ClockIcon, GridIcon, RocketIcon } from "./icons";
 
@@ -25,6 +25,17 @@ function Row({
   );
 }
 
+export function SheetHeading({ title }: { title: string }) {
+  return (
+    <h2 className="display flex flex-wrap items-baseline gap-x-2.5 text-[1.75rem] tracking-tight sm:text-3xl">
+      <span>
+        100<span className="text-lime glow-text">X</span>
+      </span>
+      <span>{title}</span>
+    </h2>
+  );
+}
+
 function TutorialStep({
   number,
   children,
@@ -33,13 +44,11 @@ function TutorialStep({
   children: ReactNode;
 }) {
   return (
-    <li className="flex gap-4">
-      <span className="display mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full border border-white/14 text-base leading-none text-muted">
+    <li className="flex gap-3">
+      <span className="display mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full border border-white/14 text-sm leading-none text-muted">
         {number}
       </span>
-      <span className="text-xl font-normal leading-7 text-ink/80">
-        {children}
-      </span>
+      <span className="text-[15px] leading-7 text-ink/80">{children}</span>
     </li>
   );
 }
@@ -76,22 +85,15 @@ export default function Sheets({
       <div
         className={`relative z-10 w-full overflow-y-auto overscroll-contain border border-white/10 shadow-2xl ${
           isGuide
-            ? "my-auto max-w-xl shrink-0 rounded-[32px] bg-surface"
+            ? "my-auto max-w-xl shrink-0 rounded-[28px] bg-surface"
             : "max-h-[min(90dvh,40rem)] max-w-lg rounded-[28px] bg-surface"
         }`}
       >
-        <div className={isGuide ? "p-6 sm:p-9" : "p-5"}>
+        <div className={isGuide ? "p-5 sm:p-6" : "p-5"}>
         {isGuide && (
           <div>
-            <div className="text-center">
-              <div className="display text-5xl tracking-tight">
-                100<span className="text-lime glow-text">X</span>
-              </div>
-              <p className="eyebrow mt-3 text-muted">
-                PICK FIVE STOCKS FROM THE PAST
-              </p>
-            </div>
-            <div className="mt-8 grid grid-cols-2 items-start border-y border-white/10 py-5">
+            <SheetHeading title="HOW IT WORKS" />
+            <div className="mt-6 grid grid-cols-2 items-start border-y border-white/10 py-5">
               <div>
                 <div className="eyebrow text-muted">BANKROLL</div>
                 <div className="hero-money mt-1">
@@ -105,7 +107,7 @@ export default function Sheets({
                 </div>
               </div>
             </div>
-            <ol className="mt-8 space-y-5">
+            <ol className="mt-6 space-y-4">
               <TutorialStep number={1}>
                 <strong className="font-semibold text-ink">Spin</strong> to land a year
                 and a market-cap rank from that year&apos;s top 100 stocks.
@@ -128,10 +130,14 @@ export default function Sheets({
                 100X. After the reveal, see the best pick from each board you faced.
               </TutorialStep>
             </ol>
-            <p className="mt-8 text-center text-xs leading-5 text-muted">
-              Market-cap ranks, financials, and long-term values include
-              gameplay estimates. Historical simulation for entertainment
-              only. Not investment advice.
+            <p className="mt-6 text-xs leading-5 text-muted">
+              Listed share prices are the actual closing print that day, not
+              split-adjusted like a modern chart. Hold multiples do adjust for
+              splits, from that session to today&apos;s cached close—price
+              only, dividends not reinvested. Market cap is the entry-session
+              figure from Financial Modeling Prep; income-statement items are
+              the last annual filing on or before that date. Historical
+              simulation for entertainment only. Not investment advice.
             </p>
             <button
               type="button"
@@ -178,15 +184,23 @@ export default function Sheets({
             </div>
             <div className="mt-4">
               <p className="mb-1 text-xs leading-5 text-muted">
-                Financial figures below are gameplay estimates, not a licensed
-                point-in-time data feed.
+                Share price is what the ticker showed that day, before later
+                splits—not the split-adjusted number on a modern chart. Market
+                cap is the entry-session print. Revenue, growth, margin, and
+                P/E come from the last annual filing on or before that date.
+                P/E is N/M when earnings were not positive.
               </p>
-              <Row label="Market cap" value={formatCompact(candidate.marketCap)} hint="Estimated size at the entry date" />
-              <Row label="Revenue" value={formatCompact(candidate.revenue)} hint="Estimated trailing-twelve-month revenue" />
-              <Row label="Revenue growth" value={formatPct(candidate.revenueGrowth)} hint="Estimated year-over-year TTM change" />
-              <Row label="Net margin" value={formatPct(candidate.netMargin)} hint="Estimated net income divided by revenue" />
-              <Row label="P/E" value={formatPe(candidate.peRatio)} hint="Estimated price to earnings; N/M if not meaningful" />
-              <Row label="Previous twelve months" value={formatPct(candidate.trailingReturn)} hint="Estimated return before the entry date" />
+              <Row
+                label="Share price"
+                value={formatSharePrice(candidate.entrySharePrice)}
+                hint="Actual close on the entry date, not split-adjusted"
+              />
+              <Row label="Market cap" value={formatCompact(candidate.marketCap)} hint="Market capitalization on the entry session" />
+              <Row label="Revenue" value={formatCompact(candidate.revenue)} hint="Last annual revenue filed on or before entry" />
+              <Row label="Revenue growth" value={formatPct(candidate.revenueGrowth)} hint="Year-over-year change vs the prior annual filing" />
+              <Row label="Net margin" value={formatPct(candidate.netMargin)} hint="Net income divided by that annual revenue" />
+              <Row label="P/E" value={formatPe(candidate.peRatio)} hint="Entry market cap divided by that annual net income; N/M if not meaningful" />
+              <Row label="Previous twelve months" value={formatPct(candidate.trailingReturn)} hint="Split-adjusted price return over the year before entry" />
             </div>
           </div>
         )}
